@@ -10,7 +10,7 @@ from causal_conv1d import causal_conv1d_fn
 import causal_conv1d_cuda
 import selective_scan_cuda
 
-
+#y输出计算
 class SelectiveScanFn(torch.autograd.Function):
 
     @staticmethod
@@ -307,7 +307,7 @@ def mamba_inner_fn(
                               out_proj_weight, out_proj_bias,
                               A, B, C, D, delta_bias, B_proj_bias, C_proj_bias, delta_softplus)
 
-
+# S4 计算
 def mamba_inner_ref(
     xz, conv1d_weight, conv1d_bias, x_proj_weight, delta_proj_weight,
     out_proj_weight, out_proj_bias,

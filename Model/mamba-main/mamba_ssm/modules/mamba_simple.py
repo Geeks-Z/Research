@@ -204,7 +204,7 @@ class Mamba(nn.Module):
             y = rearrange(y, "b d l -> b l d")
             out = self.out_proj(y)
         return out
-
+    #S6 的计算
     def step(self, hidden_states, conv_state, ssm_state):
         dtype = hidden_states.dtype
         assert hidden_states.shape[1] == 1, "Only support decoding with 1 token at a time for now"

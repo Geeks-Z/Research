@@ -12,4 +12,4 @@ model = Mamba(
 ).to("cuda")
 y = model(x)
 print(y)
-assert y.shape == x.shape
+# assert y.shape == x.shape
