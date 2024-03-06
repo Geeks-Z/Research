@@ -29,13 +29,13 @@ magnitude faster than the sequential mode.
 """
 
 def pscan_f(A, X):
-    # A : (B, D, L, N)
-    # X : (B, D, L, N)
+    #A : (B, D, L, N)
+    #X : (B, D, L, N)
 
-    # modifies X in place by doing a parallel scan.
-    # more formally, X will be populated by these values :
-    # H[t] = A[t] * H[t-1] + X[t] with H[0] = 0
-    # which are computed in parallel (2*log2(T) sequential steps (ideally), instead of T sequential steps)
+    #modifies X in place by doing a parallel scan.
+    #more formally, X will be populated by these values :
+    #H[t] = A[t] * H[t-1] + X[t] with H[0] = 0
+    #which are computed in parallel (2*log2(T) sequential steps (ideally), instead of T sequential steps)
     
     Aa = A
     Xa = X
@@ -60,7 +60,7 @@ def pscan_f(A, X):
         Aa = Aa[:, :, :, 1]
         Xa = Xa[:, :, :, 1]
 
-    # down sweep
+    #down sweep
     for k in range(num_steps-1, -1, -1):
         Aa = A[:, :, 2**k-1::2**k]
         Xa = X[:, :, 2**k-1::2**k]
@@ -85,7 +85,7 @@ def pscan_f(A, X):
             A[:, :, 2**k-1::2**(k+1)] = mx.concatenate([Aa[:, :, :, 0], mx.array([last_val_aa]).reshape(B, D, 1, -1)], axis=2)
             X[:, :, 2**k-1::2**(k+1)] = mx.concatenate([Xa[:, :, :, 0], mx.array([last_val_xa]).reshape(B, D, 1, -1)], axis=2)
 
-# main function, used in the Mamba model (mamba_mlx.py)
+#main function, used in the Mamba model (mamba_mlx.py)
 def pscan(A_in, X_in):
     """
     Applies the parallel scan operation, as defined above. Returns a new tensor.

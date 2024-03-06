@@ -9,7 +9,7 @@ batch, length, dim = 2, 512, 16
 x = torch.randn(batch, length, dim).to("cuda")
 x.requieres_grad = True
 
-# CUDA Model
+#CUDA Model
 
 torch.manual_seed(1)
 
@@ -38,10 +38,10 @@ y_pscan = model(x)
 print(sum([p.numel() for p in model.parameters()]))
 print(y_pscan.shape)
 
-# forward #
+#forward #
 print(torch.allclose(y_cuda, y_pscan, rtol=0.1))
  
-# backward #
+#backward #
 J_cuda = y_cuda.sum()
 J_cuda.backward()
 

@@ -56,7 +56,7 @@ config = MambaLMConfig(d_model=16, n_layers=4, vocab_size=32000)
 model = MambaLM(config)
 
 x = torch.randint(high=32000, size=(16, 64))
-logits = model(x) # (B, L, vocab_size)
+logits = model(x) #(B, L, vocab_size)
 ```
 
 It simply encapsulates a `Mamba` object with an embedding layer, a final normalization and a language modeling head.

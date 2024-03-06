@@ -49,7 +49,7 @@ class MambaLM(nn.Module):
     def __call__(self, tokens):
         # tokens : (B, L)
 
-        # logits : (B, L, vocab_size)
+        #logits : (B, L, vocab_size)
 
         x = self.embedding(tokens)
 
@@ -61,11 +61,11 @@ class MambaLM(nn.Module):
         return logits
     
     def step(self, token, caches):
-        # token : (B)
-        # caches : [cache(layer) for all layers], cache : (h, inputs)
+        #token : (B)
+        #caches : [cache(layer) for all layers], cache : (h, inputs)
 
-        # logits : (B, vocab_size)
-        # caches : [cache(layer) for all layers], cache : (h, inputs)
+        #logits : (B, vocab_size)
+        #caches : [cache(layer) for all layers], cache : (h, inputs)
 
         x = self.embedding(token)
 
@@ -79,24 +79,24 @@ class MambaLM(nn.Module):
     def generate(self, tokenizer, prompt: str, n_tokens_to_gen: int = 50, sample: bool = True, temperature: float = 1.0, top_k: int = None):
         self.eval()
 
-        input_ids = mx.array(tokenizer(prompt, return_tensors='np').input_ids) # (1, tokens_prompt) # (1, num_tokens)
+        input_ids = mx.array(tokenizer(prompt, return_tensors='np').input_ids) #(1, tokens_prompt) #(1, num_tokens)
 
         # caches is a list of cache, one per layer
         # cache is composed of : the hidden state, and the last d_conv-1 inputs
-        # the hidden state because the update is like an RNN
-        # the last d_conv-1 inputs because they are used in a 1d convolution (usually d_conv=4 so this is not large)
+        #the hidden state because the update is like an RNN
+        #the last d_conv-1 inputs because they are used in a 1d convolution (usually d_conv=4 so this is not large)
         caches = [(None, mx.zeros([1, self.config.d_conv-1, self.config.d_inner])) for _ in range(self.config.n_layers)]
 
         for i in range(input_ids.shape[1] + n_tokens_to_gen - 1):
-            next_token_logits, caches = self.step(input_ids[:, i], caches) # (1, vocab_size), caches
+            next_token_logits, caches = self.step(input_ids[:, i], caches) #(1, vocab_size), caches
 
-            # sample (no sampling when the prompt is being processed)
+            #sample (no sampling when the prompt is being processed)
             if i+1 >= input_ids.shape[1]:
                 
                 if top_k is not None:
-                    values = topk(next_token_logits, k=top_k) # (1, k) ordered from lowest to biggest
+                    values = topk(next_token_logits, k=top_k) #(1, k) ordered from lowest to biggest
                     mask = next_token_logits < (values[:, 0, None])
-                    next_token_logits = mx.where(mask, -5000, next_token_logits) # TODO -mx.inf is problematic for now
+                    next_token_logits = mx.where(mask, -5000, next_token_logits) #TODO -mx.inf is problematic for now
 
                 if sample and temperature > 0:
                     next_token = mx.random.categorical(next_token_logits * (1/temperature), num_samples=1)
@@ -135,13 +135,13 @@ class MambaLM(nn.Module):
 
         from utils import map_mambassm_torch_to_mlx
 
-        # copy config data
+        #copy config data
         config_data = load_config_hf(name)
         config = MambaLMConfig(d_model=config_data['d_model'], n_layers=config_data['n_layer'], vocab_size=config_data['vocab_size'])
 
         model = MambaLM(config)
 
-        # copy weights
+        #copy weights
         filename = name.split('/')[-1] + '.mlx.npz'
 
         if not os.path.exists(filename):

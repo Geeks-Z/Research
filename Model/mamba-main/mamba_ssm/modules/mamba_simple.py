@@ -31,11 +31,11 @@ except ImportError:
 class Mamba(nn.Module):
     def __init__(
         self,
-        d_model,
-        d_state=16,
-        d_conv=4,
+        d_model, # 定义 RMSNorm 维度的大小
+        d_state=16, # 你能看到的图的 ht, ht-1 的维度
+        d_conv=4, # 一维卷积的 kernel 大小
         expand=2,
-        dt_rank="auto",
+        dt_rank="auto", # 基本数值 d_model/16 的整数值, 也就是 ∆t 的阶数
         dt_min=0.001,
         dt_max=0.1,
         dt_init="random",

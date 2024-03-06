@@ -29,4 +29,4 @@ print(initial_memory/(1024**2))
 print(peak_memory/(1024**2))
 print("-----------------------------")
 
-# relate bien ce qu'on voit dans nvidia-smi (a qqchose pres : sans le torch-cuda overhead)
+#relate bien ce qu'on voit dans nvidia-smi (a qqchose pres : sans le torch-cuda overhead)

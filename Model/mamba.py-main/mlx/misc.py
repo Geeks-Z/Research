@@ -65,7 +65,7 @@ class DepthWiseConv1d(nn.Module):
         self.conv1d = nn.Conv1d(in_channels=channels, out_channels=channels,
                                 kernel_size=kernel_size, bias=True, padding=padding)
 
-        # see comment below
+        #see comment below
         indices = mx.arange(channels)
         mask = mx.zeros_like(self.conv1d.weight)
         mask[indices, :, indices] = 1
@@ -90,9 +90,9 @@ def torch_to_mlx_depthwise_weights(torch_weights):
 
     # torch_weights : (channels, 1, kernel_size) = (ED, 1, d_conv)
 
-    # mlx_weights : (channels, kernel_size, channels) = (ED, d_conv, ED)
+    #mlx_weights : (channels, kernel_size, channels) = (ED, d_conv, ED)
 
-    torch_weights = torch_weights.transpose(2, 1) # (channels, kernel_size, 1) = (ED, d_conv, 1)
+    torch_weights = torch_weights.transpose(2, 1) #(channels, kernel_size, 1) = (ED, d_conv, 1)
     channels, kernel_size, _ = torch_weights.shape
 
     mlx_weights = torch.zeros(channels, kernel_size, channels)

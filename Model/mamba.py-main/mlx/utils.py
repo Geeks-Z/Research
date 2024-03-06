@@ -7,7 +7,7 @@ import torch
 
 from misc import torch_to_mlx_depthwise_weights
 
-# TODO : map_mlx_to_mambapy_torch
+# TODO : map_mlx_to_mambapy_torch
 
 def load_config_hf(model_name):
     from transformers.utils import WEIGHTS_NAME, CONFIG_NAME
@@ -56,7 +56,7 @@ def map_mambassm_torch_to_mlx(torch_state_dict):
     return map_mambapy_torch_to_mlx(new_state_dict)
 
 """
-# todo : doesnt work, because MambaConfig and MambaLMConfig are not the ones defined in mamba.py and mamba_lm.py
+#todo : doesnt work, because MambaConfig and MambaLMConfig are not the ones defined in mamba.py and mamba_lm.py
 def mambapy_torch_to_mlx(torch_state_dict, config: Union[MambaConfig, MambaLMConfig]):
     mlx_state_dict = map_mambapy_torch_to_mlx(torch_state_dict)
 
@@ -65,10 +65,10 @@ def mambapy_torch_to_mlx(torch_state_dict, config: Union[MambaConfig, MambaLMCon
     else:
         model = MambaLM(config)
 
-    np.savez("weights.mlx.npz", **mlx_state_dict) # TODO name with config?
+    np.savez("weights.mlx.npz", **mlx_state_dict) #TODO name with config?
     model.update(tree_unflatten(list(mx.load("weights.mlx.npz").items())))
 
-    # todo : name the file according to config
+    #todo : name the file according to config
     # todo : check if file already exists
 
     return model
