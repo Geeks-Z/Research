@@ -31,12 +31,13 @@ See Figure 3 of the paper (page 8) for a visual representation of a MambaBlock.
 @dataclass
 class MambaConfig:
     d_model: int  # D
-    n_layers: int
-    dt_rank: Union[int, str] = 'auto'
-    d_state: int = 16  # N in paper/comments
-    expand_factor: int = 2  # E in paper/comments
-    d_conv: int = 4
+    n_layers: int  # 包含 Mamba 层的 ResidualBlock 的层数
+    dt_rank: Union[int, str] = 'auto'  #  基本数值 d_model/16 的整数值, 也就是 ∆t 的阶数
+    d_state: int = 16  # N in paper/comments ht, ht-1 的维度
+    expand_factor: int = 2  # E in paper/comments d_inner 与 d_model 间的倍数，通常是 2 的倍数关系
+    d_conv: int = 4  # 一维卷积的 kernel 大小
 
+    #  dt_xxx: 关于 ∆t 的一些计算参数
     dt_min: float = 0.001
     dt_max: float = 0.1
     dt_init: str = "random"  # "random" or "constant"
