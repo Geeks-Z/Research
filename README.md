@@ -1,5 +1,7 @@
 ## Research
 
+## 文件目录
+
 - `📁 CIL`：CIL（Class-Incremental Learning）类增量学习【Life-Long Machine Learning/Continual Learning】
   - `📁 dualprompt-pytorch-master`：[DualPrompt: Complementary Prompting for Rehearsal-free Continual Learning](https://arxiv.org/abs/2204.04799) | [论文源码](https://github.com/google-research/l2p) | ECCV 2022 
   - `📁 ECCV22-FOSTER-master`：[FOSTER: Feature Boosting and Compression for Class-Incremental Learning](https://arxiv.org/abs/2204.04662) | [论文源码](https://github.com/G-U-N/ECCV22-FOSTER) | ECCV 2022
@@ -10,3 +12,12 @@
   - `📁 MyLibraries`：基于第三方库修改后的个人代码
 ---
 - `📁 Model`：经典模型代码
+
+## 实验脚本
+
+- 执行脚本：`nohup ./train.sh > ./res/.out 2>&1 &`
+- 脚本配置：编辑`train.sh`
+  ```bash
+  #!/bin/bash
+  python main.py --config ./exps/simplecil.json`
+  ```
