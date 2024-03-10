@@ -19,5 +19,5 @@
 - 脚本配置：编辑`train.sh`
   ```bash
   #!/bin/bash
-  python main.py --config ./exps/simplecil.json`
+  python main.py --config ./exps/simplecil.json
   ```
