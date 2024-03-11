@@ -1,5 +1,9 @@
 ## Research
 
+<div align=center><img src="https://markdownimg-hw.oss-cn-beijing.aliyuncs.com/logo.png" style="zoom: 60%;" /></div>
+
+<div align=center><img src="https://visitor-badge.laobi.icu/badge?page_id=Geeks-Z.Research&left_color=green&right_color=red" /> <img src="https://img.shields.io/github/last-commit/Geeks-Z/Research" /> <img src="https://img.shields.io/github/license/Geeks-Z/Research" /></div>
+
 ## 文件目录
 
 - `📁 CIL`：CIL（Class-Incremental Learning）类增量学习【Life-Long Machine Learning/Continual Learning】
