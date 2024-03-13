@@ -1,0 +1,192 @@
+nohup: 忽略输入
+2023-11-14 17:06:55,516 [trainer.py] => config: ./exps/dualprompt.json
+2023-11-14 17:06:55,516 [trainer.py] => prefix:  
+2023-11-14 17:06:55,516 [trainer.py] => dataset: imagenetr
+2023-11-14 17:06:55,516 [trainer.py] => memory_size: 0
+2023-11-14 17:06:55,516 [trainer.py] => memory_per_class: 0
+2023-11-14 17:06:55,516 [trainer.py] => fixed_memory: False
+2023-11-14 17:06:55,516 [trainer.py] => shuffle: True
+2023-11-14 17:06:55,516 [trainer.py] => init_cls: 20
+2023-11-14 17:06:55,516 [trainer.py] => increment: 20
+2023-11-14 17:06:55,516 [trainer.py] => model_name: dualprompt
+2023-11-14 17:06:55,516 [trainer.py] => backbone_type: vit_base_patch16_224_dualprompt
+2023-11-14 17:06:55,516 [trainer.py] => get_original_backbone: True
+2023-11-14 17:06:55,516 [trainer.py] => device: [device(type='cuda', index=0)]
+2023-11-14 17:06:55,516 [trainer.py] => seed: 1993
+2023-11-14 17:06:55,516 [trainer.py] => tuned_epoch: 5
+2023-11-14 17:06:55,516 [trainer.py] => init_lr: 0.001
+2023-11-14 17:06:55,516 [trainer.py] => batch_size: 24
+2023-11-14 17:06:55,517 [trainer.py] => weight_decay: 0
+2023-11-14 17:06:55,517 [trainer.py] => min_lr: 1e-05
+2023-11-14 17:06:55,517 [trainer.py] => optimizer: adam
+2023-11-14 17:06:55,517 [trainer.py] => scheduler: constant
+2023-11-14 17:06:55,517 [trainer.py] => reinit_optimizer: True
+2023-11-14 17:06:55,517 [trainer.py] => global_pool: token
+2023-11-14 17:06:55,517 [trainer.py] => head_type: token
+2023-11-14 17:06:55,517 [trainer.py] => freeze: ['blocks', 'patch_embed', 'cls_token', 'norm', 'pos_embed']
+2023-11-14 17:06:55,517 [trainer.py] => pretrained: True
+2023-11-14 17:06:55,517 [trainer.py] => drop: 0.0
+2023-11-14 17:06:55,517 [trainer.py] => drop_path: 0.0
+2023-11-14 17:06:55,517 [trainer.py] => use_g_prompt: True
+2023-11-14 17:06:55,517 [trainer.py] => g_prompt_length: 5
+2023-11-14 17:06:55,517 [trainer.py] => g_prompt_layer_idx: [0, 1]
+2023-11-14 17:06:55,517 [trainer.py] => use_prefix_tune_for_g_prompt: True
+2023-11-14 17:06:55,517 [trainer.py] => use_e_prompt: True
+2023-11-14 17:06:55,517 [trainer.py] => e_prompt_layer_idx: [2, 3, 4]
+2023-11-14 17:06:55,517 [trainer.py] => use_prefix_tune_for_e_prompt: True
+2023-11-14 17:06:55,517 [trainer.py] => prompt_pool: True
+2023-11-14 17:06:55,517 [trainer.py] => size: 10
+2023-11-14 17:06:55,517 [trainer.py] => length: 5
+2023-11-14 17:06:55,517 [trainer.py] => top_k: 1
+2023-11-14 17:06:55,517 [trainer.py] => initializer: uniform
+2023-11-14 17:06:55,517 [trainer.py] => prompt_key: True
+2023-11-14 17:06:55,517 [trainer.py] => prompt_key_init: uniform
+2023-11-14 17:06:55,517 [trainer.py] => use_prompt_mask: True
+2023-11-14 17:06:55,517 [trainer.py] => shared_prompt_pool: True
+2023-11-14 17:06:55,517 [trainer.py] => shared_prompt_key: False
+2023-11-14 17:06:55,517 [trainer.py] => batchwise_prompt: True
+2023-11-14 17:06:55,517 [trainer.py] => embedding_key: cls
+2023-11-14 17:06:55,517 [trainer.py] => predefined_key: 
+2023-11-14 17:06:55,517 [trainer.py] => pull_constraint: True
+2023-11-14 17:06:55,517 [trainer.py] => pull_constraint_coeff: 0.1
+2023-11-14 17:06:55,517 [trainer.py] => same_key_value: False
+2023-11-14 17:06:55,623 [data_manager.py] => [168, 136, 51, 9, 183, 101, 171, 99, 42, 159, 191, 70, 16, 188, 27, 10, 175, 26, 68, 187, 98, 6, 85, 35, 112, 43, 100, 0, 103, 181, 88, 59, 4, 2, 116, 174, 94, 80, 106, 1, 147, 17, 141, 131, 72, 23, 173, 54, 197, 118, 87, 32, 79, 104, 91, 19, 135, 107, 178, 36, 11, 199, 142, 8, 122, 3, 28, 57, 153, 172, 190, 56, 49, 44, 97, 62, 151, 169, 194, 55, 192, 12, 189, 78, 66, 180, 15, 137, 109, 134, 92, 119, 126, 52, 170, 40, 148, 65, 144, 64, 138, 45, 77, 89, 154, 90, 71, 193, 74, 30, 113, 143, 96, 84, 67, 50, 186, 156, 69, 21, 18, 111, 108, 58, 125, 157, 150, 110, 182, 129, 166, 83, 81, 60, 13, 165, 14, 176, 63, 117, 5, 22, 145, 121, 38, 41, 82, 127, 114, 20, 31, 53, 37, 163, 196, 130, 152, 162, 86, 76, 24, 34, 184, 149, 33, 128, 198, 155, 146, 167, 139, 120, 140, 102, 47, 25, 158, 123, 46, 164, 61, 7, 115, 75, 133, 160, 105, 132, 179, 124, 48, 73, 93, 39, 95, 195, 29, 177, 185, 161]
+2023-11-14 17:07:00,956 [dualprompt.py] => 86,205,896 model total parameters.
+2023-11-14 17:07:00,957 [dualprompt.py] => 407,240 model training parameters.
+2023-11-14 17:07:00,957 [dualprompt.py] => g_prompt: 15360
+2023-11-14 17:07:00,957 [dualprompt.py] => e_prompt.prompt: 230400
+2023-11-14 17:07:00,957 [dualprompt.py] => e_prompt.prompt_key: 7680
+2023-11-14 17:07:00,957 [dualprompt.py] => head.weight: 153600
+2023-11-14 17:07:00,957 [dualprompt.py] => head.bias: 200
+2023-11-14 17:07:00,958 [trainer.py] => All params: 172158352
+2023-11-14 17:07:00,959 [trainer.py] => Trainable params: 407240
+2023-11-14 17:07:00,959 [dualprompt.py] => Learning on 0-20
+/home/team/zhaohongwei/anaconda3/envs/l2p/lib/python3.8/site-packages/torchvision/transforms/transforms.py:332: UserWarning: Argument 'interpolation' of type int is deprecated since 0.13 and will be removed in 0.15. Please use InterpolationMode enum.
+  warnings.warn(
+  0%|          | 0/5 [00:00<?, ?it/s]Task 0, Epoch 1/5 => Loss 1.289, Train_accy 64.05:   0%|          | 0/5 [00:23<?, ?it/s]Task 0, Epoch 1/5 => Loss 1.289, Train_accy 64.05:  20%|██        | 1/5 [00:23<01:34, 23.74s/it]Task 0, Epoch 2/5 => Loss 0.618, Train_accy 81.46:  20%|██        | 1/5 [00:45<01:34, 23.74s/it]Task 0, Epoch 2/5 => Loss 0.618, Train_accy 81.46:  40%|████      | 2/5 [00:45<01:07, 22.59s/it]Task 0, Epoch 3/5 => Loss 0.527, Train_accy 83.99:  40%|████      | 2/5 [01:07<01:07, 22.59s/it]Task 0, Epoch 3/5 => Loss 0.527, Train_accy 83.99:  60%|██████    | 3/5 [01:07<00:44, 22.17s/it]Task 0, Epoch 4/5 => Loss 0.459, Train_accy 86.38:  60%|██████    | 3/5 [01:29<00:44, 22.17s/it]Task 0, Epoch 4/5 => Loss 0.459, Train_accy 86.38:  80%|████████  | 4/5 [01:29<00:22, 22.05s/it]Task 0, Epoch 5/5 => Loss 0.456, Train_accy 86.06, Test_accy 84.47:  80%|████████  | 4/5 [01:55<00:22, 22.05s/it]Task 0, Epoch 5/5 => Loss 0.456, Train_accy 86.06, Test_accy 84.47: 100%|██████████| 5/5 [01:55<00:00, 23.45s/it]Task 0, Epoch 5/5 => Loss 0.456, Train_accy 86.06, Test_accy 84.47: 100%|██████████| 5/5 [01:55<00:00, 23.00s/it]2023-11-14 17:08:57,731 [dualprompt.py] => Task 0, Epoch 5/5 => Loss 0.456, Train_accy 86.06, Test_accy 84.47
+
+2023-11-14 17:09:01,748 [trainer.py] => No NME accuracy.
+2023-11-14 17:09:01,749 [trainer.py] => CNN: {'total': 84.47, '00-19': 84.47, 'old': 0, 'new': 84.47}
+2023-11-14 17:09:01,749 [trainer.py] => CNN top1 curve: [84.47]
+2023-11-14 17:09:01,749 [trainer.py] => CNN top5 curve: [96.81]
+
+Average Accuracy (CNN): 84.47
+2023-11-14 17:09:01,750 [trainer.py] => Average Accuracy (CNN): 84.47 
+
+2023-11-14 17:09:01,753 [trainer.py] => All params: 172158352
+2023-11-14 17:09:01,755 [trainer.py] => Trainable params: 407240
+2023-11-14 17:09:01,755 [dualprompt.py] => Learning on 20-40
+  0%|          | 0/5 [00:00<?, ?it/s]Task 1, Epoch 1/5 => Loss 1.300, Train_accy 64.56:   0%|          | 0/5 [00:20<?, ?it/s]Task 1, Epoch 1/5 => Loss 1.300, Train_accy 64.56:  20%|██        | 1/5 [00:20<01:20, 20.11s/it]Task 1, Epoch 2/5 => Loss 0.668, Train_accy 80.13:  20%|██        | 1/5 [00:40<01:20, 20.11s/it]Task 1, Epoch 2/5 => Loss 0.668, Train_accy 80.13:  40%|████      | 2/5 [00:40<01:00, 20.10s/it]Task 1, Epoch 3/5 => Loss 0.550, Train_accy 83.06:  40%|████      | 2/5 [01:00<01:00, 20.10s/it]Task 1, Epoch 3/5 => Loss 0.550, Train_accy 83.06:  60%|██████    | 3/5 [01:00<00:40, 20.10s/it]Task 1, Epoch 4/5 => Loss 0.492, Train_accy 84.43:  60%|██████    | 3/5 [01:20<00:40, 20.10s/it]Task 1, Epoch 4/5 => Loss 0.492, Train_accy 84.43:  80%|████████  | 4/5 [01:20<00:20, 20.09s/it]Task 1, Epoch 5/5 => Loss 0.423, Train_accy 86.34, Test_accy 81.00:  80%|████████  | 4/5 [01:47<00:20, 20.09s/it]Task 1, Epoch 5/5 => Loss 0.423, Train_accy 86.34, Test_accy 81.00: 100%|██████████| 5/5 [01:47<00:00, 22.72s/it]Task 1, Epoch 5/5 => Loss 0.423, Train_accy 86.34, Test_accy 81.00: 100%|██████████| 5/5 [01:47<00:00, 21.55s/it]2023-11-14 17:10:49,533 [dualprompt.py] => Task 1, Epoch 5/5 => Loss 0.423, Train_accy 86.34, Test_accy 81.00
+
+2023-11-14 17:10:56,768 [trainer.py] => No NME accuracy.
+2023-11-14 17:10:56,769 [trainer.py] => CNN: {'total': 81.0, '00-19': 81.28, '20-39': 80.7, 'old': 81.28, 'new': 80.7}
+2023-11-14 17:10:56,769 [trainer.py] => CNN top1 curve: [84.47, 81.0]
+2023-11-14 17:10:56,769 [trainer.py] => CNN top5 curve: [96.81, 93.57]
+
+Average Accuracy (CNN): 82.735
+2023-11-14 17:10:56,769 [trainer.py] => Average Accuracy (CNN): 82.735 
+
+2023-11-14 17:10:56,773 [trainer.py] => All params: 172158352
+2023-11-14 17:10:56,775 [trainer.py] => Trainable params: 407240
+2023-11-14 17:10:56,776 [dualprompt.py] => Learning on 40-60
+  0%|          | 0/5 [00:00<?, ?it/s]Task 2, Epoch 1/5 => Loss 1.465, Train_accy 61.72:   0%|          | 0/5 [00:18<?, ?it/s]Task 2, Epoch 1/5 => Loss 1.465, Train_accy 61.72:  20%|██        | 1/5 [00:18<01:13, 18.47s/it]Task 2, Epoch 2/5 => Loss 0.712, Train_accy 79.04:  20%|██        | 1/5 [00:36<01:13, 18.47s/it]Task 2, Epoch 2/5 => Loss 0.712, Train_accy 79.04:  40%|████      | 2/5 [00:36<00:55, 18.45s/it]Task 2, Epoch 3/5 => Loss 0.593, Train_accy 82.29:  40%|████      | 2/5 [00:55<00:55, 18.45s/it]Task 2, Epoch 3/5 => Loss 0.593, Train_accy 82.29:  60%|██████    | 3/5 [00:55<00:36, 18.43s/it]Task 2, Epoch 4/5 => Loss 0.517, Train_accy 85.10:  60%|██████    | 3/5 [01:13<00:36, 18.43s/it]Task 2, Epoch 4/5 => Loss 0.517, Train_accy 85.10:  80%|████████  | 4/5 [01:13<00:18, 18.42s/it]Task 2, Epoch 5/5 => Loss 0.482, Train_accy 85.92, Test_accy 77.11:  80%|████████  | 4/5 [01:42<00:18, 18.42s/it]Task 2, Epoch 5/5 => Loss 0.482, Train_accy 85.92, Test_accy 77.11: 100%|██████████| 5/5 [01:42<00:00, 22.15s/it]Task 2, Epoch 5/5 => Loss 0.482, Train_accy 85.92, Test_accy 77.11: 100%|██████████| 5/5 [01:42<00:00, 20.50s/it]2023-11-14 17:12:39,273 [dualprompt.py] => Task 2, Epoch 5/5 => Loss 0.482, Train_accy 85.92, Test_accy 77.11
+
+2023-11-14 17:12:49,706 [trainer.py] => No NME accuracy.
+2023-11-14 17:12:49,706 [trainer.py] => CNN: {'total': 77.11, '00-19': 78.96, '20-39': 76.58, '40-59': 75.58, 'old': 77.82, 'new': 75.58}
+2023-11-14 17:12:49,707 [trainer.py] => CNN top1 curve: [84.47, 81.0, 77.11]
+2023-11-14 17:12:49,707 [trainer.py] => CNN top5 curve: [96.81, 93.57, 91.07]
+
+Average Accuracy (CNN): 80.86
+2023-11-14 17:12:49,707 [trainer.py] => Average Accuracy (CNN): 80.86 
+
+2023-11-14 17:12:49,710 [trainer.py] => All params: 172158352
+2023-11-14 17:12:49,713 [trainer.py] => Trainable params: 407240
+2023-11-14 17:12:49,713 [dualprompt.py] => Learning on 60-80
+  0%|          | 0/5 [00:00<?, ?it/s]Task 3, Epoch 1/5 => Loss 1.386, Train_accy 62.71:   0%|          | 0/5 [00:17<?, ?it/s]Task 3, Epoch 1/5 => Loss 1.386, Train_accy 62.71:  20%|██        | 1/5 [00:17<01:11, 17.95s/it]Task 3, Epoch 2/5 => Loss 0.718, Train_accy 78.63:  20%|██        | 1/5 [00:35<01:11, 17.95s/it]Task 3, Epoch 2/5 => Loss 0.718, Train_accy 78.63:  40%|████      | 2/5 [00:35<00:53, 17.99s/it]Task 3, Epoch 3/5 => Loss 0.579, Train_accy 83.43:  40%|████      | 2/5 [00:53<00:53, 17.99s/it]Task 3, Epoch 3/5 => Loss 0.579, Train_accy 83.43:  60%|██████    | 3/5 [00:53<00:35, 18.00s/it]Task 3, Epoch 4/5 => Loss 0.493, Train_accy 85.17:  60%|██████    | 3/5 [01:12<00:35, 18.00s/it]Task 3, Epoch 4/5 => Loss 0.493, Train_accy 85.17:  80%|████████  | 4/5 [01:12<00:18, 18.03s/it]Task 3, Epoch 5/5 => Loss 0.478, Train_accy 86.22, Test_accy 75.10:  80%|████████  | 4/5 [01:43<00:18, 18.03s/it]Task 3, Epoch 5/5 => Loss 0.478, Train_accy 86.22, Test_accy 75.10: 100%|██████████| 5/5 [01:43<00:00, 22.84s/it]Task 3, Epoch 5/5 => Loss 0.478, Train_accy 86.22, Test_accy 75.10: 100%|██████████| 5/5 [01:43<00:00, 20.69s/it]2023-11-14 17:14:33,165 [dualprompt.py] => Task 3, Epoch 5/5 => Loss 0.478, Train_accy 86.22, Test_accy 75.10
+
+2023-11-14 17:14:46,367 [trainer.py] => No NME accuracy.
+2023-11-14 17:14:46,368 [trainer.py] => CNN: {'total': 75.1, '00-19': 77.79, '20-39': 75.95, '40-59': 74.09, '60-79': 71.98, 'old': 76.02, 'new': 71.98}
+2023-11-14 17:14:46,368 [trainer.py] => CNN top1 curve: [84.47, 81.0, 77.11, 75.1]
+2023-11-14 17:14:46,368 [trainer.py] => CNN top5 curve: [96.81, 93.57, 91.07, 89.27]
+
+Average Accuracy (CNN): 79.41999999999999
+2023-11-14 17:14:46,369 [trainer.py] => Average Accuracy (CNN): 79.41999999999999 
+
+2023-11-14 17:14:46,372 [trainer.py] => All params: 172158352
+2023-11-14 17:14:46,374 [trainer.py] => Trainable params: 407240
+2023-11-14 17:14:46,374 [dualprompt.py] => Learning on 80-100
+  0%|          | 0/5 [00:00<?, ?it/s]Task 4, Epoch 1/5 => Loss 1.447, Train_accy 62.07:   0%|          | 0/5 [00:17<?, ?it/s]Task 4, Epoch 1/5 => Loss 1.447, Train_accy 62.07:  20%|██        | 1/5 [00:17<01:08, 17.16s/it]Task 4, Epoch 2/5 => Loss 0.721, Train_accy 79.03:  20%|██        | 1/5 [00:34<01:08, 17.16s/it]Task 4, Epoch 2/5 => Loss 0.721, Train_accy 79.03:  40%|████      | 2/5 [00:34<00:51, 17.17s/it]Task 4, Epoch 3/5 => Loss 0.603, Train_accy 81.66:  40%|████      | 2/5 [00:51<00:51, 17.17s/it]Task 4, Epoch 3/5 => Loss 0.603, Train_accy 81.66:  60%|██████    | 3/5 [00:51<00:34, 17.15s/it]Task 4, Epoch 4/5 => Loss 0.506, Train_accy 85.01:  60%|██████    | 3/5 [01:08<00:34, 17.15s/it]Task 4, Epoch 4/5 => Loss 0.506, Train_accy 85.01:  80%|████████  | 4/5 [01:08<00:17, 17.13s/it]Task 4, Epoch 5/5 => Loss 0.441, Train_accy 86.80, Test_accy 72.53:  80%|████████  | 4/5 [01:41<00:17, 17.13s/it]Task 4, Epoch 5/5 => Loss 0.441, Train_accy 86.80, Test_accy 72.53: 100%|██████████| 5/5 [01:41<00:00, 22.83s/it]Task 4, Epoch 5/5 => Loss 0.441, Train_accy 86.80, Test_accy 72.53: 100%|██████████| 5/5 [01:41<00:00, 20.30s/it]2023-11-14 17:16:27,875 [dualprompt.py] => Task 4, Epoch 5/5 => Loss 0.441, Train_accy 86.80, Test_accy 72.53
+
+2023-11-14 17:16:43,612 [trainer.py] => No NME accuracy.
+2023-11-14 17:16:43,612 [trainer.py] => CNN: {'total': 72.53, '00-19': 75.91, '20-39': 75.79, '40-59': 72.28, '60-79': 69.88, '80-99': 66.94, 'old': 73.62, 'new': 66.94}
+2023-11-14 17:16:43,612 [trainer.py] => CNN top1 curve: [84.47, 81.0, 77.11, 75.1, 72.53]
+2023-11-14 17:16:43,612 [trainer.py] => CNN top5 curve: [96.81, 93.57, 91.07, 89.27, 87.81]
+
+Average Accuracy (CNN): 78.04199999999999
+2023-11-14 17:16:43,613 [trainer.py] => Average Accuracy (CNN): 78.04199999999999 
+
+2023-11-14 17:16:43,614 [trainer.py] => All params: 172158352
+2023-11-14 17:16:43,615 [trainer.py] => Trainable params: 407240
+2023-11-14 17:16:43,616 [dualprompt.py] => Learning on 100-120
+  0%|          | 0/5 [00:00<?, ?it/s]Task 5, Epoch 1/5 => Loss 1.203, Train_accy 67.02:   0%|          | 0/5 [00:20<?, ?it/s]Task 5, Epoch 1/5 => Loss 1.203, Train_accy 67.02:  20%|██        | 1/5 [00:20<01:23, 20.85s/it]Task 5, Epoch 2/5 => Loss 0.612, Train_accy 81.31:  20%|██        | 1/5 [00:41<01:23, 20.85s/it]Task 5, Epoch 2/5 => Loss 0.612, Train_accy 81.31:  40%|████      | 2/5 [00:41<01:02, 20.89s/it]Task 5, Epoch 3/5 => Loss 0.524, Train_accy 83.49:  40%|████      | 2/5 [01:02<01:02, 20.89s/it]Task 5, Epoch 3/5 => Loss 0.524, Train_accy 83.49:  60%|██████    | 3/5 [01:02<00:41, 20.91s/it]Task 5, Epoch 4/5 => Loss 0.435, Train_accy 87.20:  60%|██████    | 3/5 [01:23<00:41, 20.91s/it]Task 5, Epoch 4/5 => Loss 0.435, Train_accy 87.20:  80%|████████  | 4/5 [01:23<00:20, 20.92s/it]Task 5, Epoch 5/5 => Loss 0.426, Train_accy 87.24, Test_accy 71.22:  80%|████████  | 4/5 [02:03<00:20, 20.92s/it]Task 5, Epoch 5/5 => Loss 0.426, Train_accy 87.24, Test_accy 71.22: 100%|██████████| 5/5 [02:03<00:00, 27.79s/it]Task 5, Epoch 5/5 => Loss 0.426, Train_accy 87.24, Test_accy 71.22: 100%|██████████| 5/5 [02:03<00:00, 24.72s/it]2023-11-14 17:18:47,242 [dualprompt.py] => Task 5, Epoch 5/5 => Loss 0.426, Train_accy 87.24, Test_accy 71.22
+
+2023-11-14 17:19:06,423 [trainer.py] => No NME accuracy.
+2023-11-14 17:19:06,424 [trainer.py] => CNN: {'total': 71.22, '00-19': 73.73, '20-39': 75.47, '40-59': 70.63, '60-79': 68.65, '80-99': 66.53, '100-119': 70.76, 'old': 71.32, 'new': 70.76}
+2023-11-14 17:19:06,424 [trainer.py] => CNN top1 curve: [84.47, 81.0, 77.11, 75.1, 72.53, 71.22]
+2023-11-14 17:19:06,425 [trainer.py] => CNN top5 curve: [96.81, 93.57, 91.07, 89.27, 87.81, 87.33]
+
+Average Accuracy (CNN): 76.90499999999999
+2023-11-14 17:19:06,425 [trainer.py] => Average Accuracy (CNN): 76.90499999999999 
+
+2023-11-14 17:19:06,428 [trainer.py] => All params: 172158352
+2023-11-14 17:19:06,430 [trainer.py] => Trainable params: 407240
+2023-11-14 17:19:06,431 [dualprompt.py] => Learning on 120-140
+  0%|          | 0/5 [00:00<?, ?it/s]Task 6, Epoch 1/5 => Loss 1.251, Train_accy 66.67:   0%|          | 0/5 [00:16<?, ?it/s]Task 6, Epoch 1/5 => Loss 1.251, Train_accy 66.67:  20%|██        | 1/5 [00:16<01:07, 16.77s/it]Task 6, Epoch 2/5 => Loss 0.622, Train_accy 82.53:  20%|██        | 1/5 [00:33<01:07, 16.77s/it]Task 6, Epoch 2/5 => Loss 0.622, Train_accy 82.53:  40%|████      | 2/5 [00:33<00:50, 16.79s/it]Task 6, Epoch 3/5 => Loss 0.503, Train_accy 85.40:  40%|████      | 2/5 [00:50<00:50, 16.79s/it]Task 6, Epoch 3/5 => Loss 0.503, Train_accy 85.40:  60%|██████    | 3/5 [00:50<00:33, 16.78s/it]Task 6, Epoch 4/5 => Loss 0.424, Train_accy 86.91:  60%|██████    | 3/5 [01:07<00:33, 16.78s/it]Task 6, Epoch 4/5 => Loss 0.424, Train_accy 86.91:  80%|████████  | 4/5 [01:07<00:16, 16.81s/it]Task 6, Epoch 5/5 => Loss 0.379, Train_accy 88.42, Test_accy 70.43:  80%|████████  | 4/5 [01:46<00:16, 16.81s/it]Task 6, Epoch 5/5 => Loss 0.379, Train_accy 88.42, Test_accy 70.43: 100%|██████████| 5/5 [01:46<00:00, 24.74s/it]Task 6, Epoch 5/5 => Loss 0.379, Train_accy 88.42, Test_accy 70.43: 100%|██████████| 5/5 [01:46<00:00, 21.20s/it]2023-11-14 17:20:52,454 [dualprompt.py] => Task 6, Epoch 5/5 => Loss 0.379, Train_accy 88.42, Test_accy 70.43
+
+2023-11-14 17:21:14,346 [trainer.py] => No NME accuracy.
+2023-11-14 17:21:14,346 [trainer.py] => CNN: {'total': 70.43, '00-19': 73.0, '20-39': 74.68, '40-59': 70.79, '60-79': 68.48, '80-99': 66.74, '100-119': 69.85, '120-139': 68.01, 'old': 70.81, 'new': 68.01}
+2023-11-14 17:21:14,347 [trainer.py] => CNN top1 curve: [84.47, 81.0, 77.11, 75.1, 72.53, 71.22, 70.43]
+2023-11-14 17:21:14,347 [trainer.py] => CNN top5 curve: [96.81, 93.57, 91.07, 89.27, 87.81, 87.33, 86.47]
+
+Average Accuracy (CNN): 75.97999999999999
+2023-11-14 17:21:14,347 [trainer.py] => Average Accuracy (CNN): 75.97999999999999 
+
+2023-11-14 17:21:14,350 [trainer.py] => All params: 172158352
+2023-11-14 17:21:14,352 [trainer.py] => Trainable params: 407240
+2023-11-14 17:21:14,353 [dualprompt.py] => Learning on 140-160
+  0%|          | 0/5 [00:00<?, ?it/s]Task 7, Epoch 1/5 => Loss 1.125, Train_accy 70.42:   0%|          | 0/5 [00:22<?, ?it/s]Task 7, Epoch 1/5 => Loss 1.125, Train_accy 70.42:  20%|██        | 1/5 [00:22<01:28, 22.09s/it]Task 7, Epoch 2/5 => Loss 0.573, Train_accy 83.81:  20%|██        | 1/5 [00:44<01:28, 22.09s/it]Task 7, Epoch 2/5 => Loss 0.573, Train_accy 83.81:  40%|████      | 2/5 [00:44<01:06, 22.06s/it]Task 7, Epoch 3/5 => Loss 0.440, Train_accy 86.65:  40%|████      | 2/5 [01:06<01:06, 22.06s/it]Task 7, Epoch 3/5 => Loss 0.440, Train_accy 86.65:  60%|██████    | 3/5 [01:06<00:44, 22.07s/it]Task 7, Epoch 4/5 => Loss 0.448, Train_accy 87.04:  60%|██████    | 3/5 [01:28<00:44, 22.07s/it]Task 7, Epoch 4/5 => Loss 0.448, Train_accy 87.04:  80%|████████  | 4/5 [01:28<00:22, 22.05s/it]Task 7, Epoch 5/5 => Loss 0.393, Train_accy 87.86, Test_accy 70.32:  80%|████████  | 4/5 [02:15<00:22, 22.05s/it]Task 7, Epoch 5/5 => Loss 0.393, Train_accy 87.86, Test_accy 70.32: 100%|██████████| 5/5 [02:15<00:00, 31.29s/it]Task 7, Epoch 5/5 => Loss 0.393, Train_accy 87.86, Test_accy 70.32: 100%|██████████| 5/5 [02:15<00:00, 27.18s/it]2023-11-14 17:23:30,283 [dualprompt.py] => Task 7, Epoch 5/5 => Loss 0.393, Train_accy 87.86, Test_accy 70.32
+
+2023-11-14 17:23:55,973 [trainer.py] => No NME accuracy.
+2023-11-14 17:23:55,973 [trainer.py] => CNN: {'total': 70.32, '00-19': 71.7, '20-39': 73.73, '40-59': 70.13, '60-79': 67.95, '80-99': 66.53, '100-119': 67.42, '120-139': 67.31, '140-159': 75.58, 'old': 69.41, 'new': 75.58}
+2023-11-14 17:23:55,974 [trainer.py] => CNN top1 curve: [84.47, 81.0, 77.11, 75.1, 72.53, 71.22, 70.43, 70.32]
+2023-11-14 17:23:55,974 [trainer.py] => CNN top5 curve: [96.81, 93.57, 91.07, 89.27, 87.81, 87.33, 86.47, 86.38]
+
+Average Accuracy (CNN): 75.27249999999998
+2023-11-14 17:23:55,974 [trainer.py] => Average Accuracy (CNN): 75.27249999999998 
+
+2023-11-14 17:23:55,977 [trainer.py] => All params: 172158352
+2023-11-14 17:23:55,979 [trainer.py] => Trainable params: 407240
+2023-11-14 17:23:55,979 [dualprompt.py] => Learning on 160-180
+  0%|          | 0/5 [00:00<?, ?it/s]Task 8, Epoch 1/5 => Loss 1.499, Train_accy 59.86:   0%|          | 0/5 [00:15<?, ?it/s]Task 8, Epoch 1/5 => Loss 1.499, Train_accy 59.86:  20%|██        | 1/5 [00:15<01:01, 15.42s/it]Task 8, Epoch 2/5 => Loss 0.707, Train_accy 80.29:  20%|██        | 1/5 [00:30<01:01, 15.42s/it]Task 8, Epoch 2/5 => Loss 0.707, Train_accy 80.29:  40%|████      | 2/5 [00:30<00:46, 15.41s/it]Task 8, Epoch 3/5 => Loss 0.586, Train_accy 83.73:  40%|████      | 2/5 [00:46<00:46, 15.41s/it]Task 8, Epoch 3/5 => Loss 0.586, Train_accy 83.73:  60%|██████    | 3/5 [00:46<00:30, 15.41s/it]Task 8, Epoch 4/5 => Loss 0.547, Train_accy 83.47:  60%|██████    | 3/5 [01:01<00:30, 15.41s/it]Task 8, Epoch 4/5 => Loss 0.547, Train_accy 83.47:  80%|████████  | 4/5 [01:01<00:15, 15.43s/it]Task 8, Epoch 5/5 => Loss 0.487, Train_accy 85.47, Test_accy 69.49:  80%|████████  | 4/5 [01:45<00:15, 15.43s/it]Task 8, Epoch 5/5 => Loss 0.487, Train_accy 85.47, Test_accy 69.49: 100%|██████████| 5/5 [01:45<00:00, 25.59s/it]Task 8, Epoch 5/5 => Loss 0.487, Train_accy 85.47, Test_accy 69.49: 100%|██████████| 5/5 [01:45<00:00, 21.06s/it]2023-11-14 17:25:41,280 [dualprompt.py] => Task 8, Epoch 5/5 => Loss 0.487, Train_accy 85.47, Test_accy 69.49
+
+2023-11-14 17:26:09,476 [trainer.py] => No NME accuracy.
+2023-11-14 17:26:09,477 [trainer.py] => CNN: {'total': 69.49, '00-19': 71.26, '20-39': 73.89, '40-59': 68.98, '60-79': 67.78, '80-99': 67.15, '100-119': 66.67, '120-139': 66.78, '140-159': 75.45, '160-179': 64.23, 'old': 70.0, 'new': 64.23}
+2023-11-14 17:26:09,477 [trainer.py] => CNN top1 curve: [84.47, 81.0, 77.11, 75.1, 72.53, 71.22, 70.43, 70.32, 69.49]
+2023-11-14 17:26:09,477 [trainer.py] => CNN top5 curve: [96.81, 93.57, 91.07, 89.27, 87.81, 87.33, 86.47, 86.38, 85.56]
+
+Average Accuracy (CNN): 74.62999999999998
+2023-11-14 17:26:09,477 [trainer.py] => Average Accuracy (CNN): 74.62999999999998 
+
+2023-11-14 17:26:09,480 [trainer.py] => All params: 172158352
+2023-11-14 17:26:09,482 [trainer.py] => Trainable params: 407240
+2023-11-14 17:26:09,482 [dualprompt.py] => Learning on 180-200
+  0%|          | 0/5 [00:00<?, ?it/s]Task 9, Epoch 1/5 => Loss 1.224, Train_accy 67.14:   0%|          | 0/5 [00:17<?, ?it/s]Task 9, Epoch 1/5 => Loss 1.224, Train_accy 67.14:  20%|██        | 1/5 [00:17<01:11, 17.85s/it]Task 9, Epoch 2/5 => Loss 0.567, Train_accy 83.13:  20%|██        | 1/5 [00:35<01:11, 17.85s/it]Task 9, Epoch 2/5 => Loss 0.567, Train_accy 83.13:  40%|████      | 2/5 [00:35<00:53, 17.90s/it]Task 9, Epoch 3/5 => Loss 0.479, Train_accy 85.59:  40%|████      | 2/5 [00:53<00:53, 17.90s/it]Task 9, Epoch 3/5 => Loss 0.479, Train_accy 85.59:  60%|██████    | 3/5 [00:53<00:35, 17.88s/it]Task 9, Epoch 4/5 => Loss 0.393, Train_accy 88.77:  60%|██████    | 3/5 [01:11<00:35, 17.88s/it]Task 9, Epoch 4/5 => Loss 0.393, Train_accy 88.77:  80%|████████  | 4/5 [01:11<00:17, 17.90s/it]Task 9, Epoch 5/5 => Loss 0.436, Train_accy 86.74, Test_accy 67.98:  80%|████████  | 4/5 [02:00<00:17, 17.90s/it]Task 9, Epoch 5/5 => Loss 0.436, Train_accy 86.74, Test_accy 67.98: 100%|██████████| 5/5 [02:00<00:00, 29.08s/it]Task 9, Epoch 5/5 => Loss 0.436, Train_accy 86.74, Test_accy 67.98: 100%|██████████| 5/5 [02:00<00:00, 24.10s/it]2023-11-14 17:28:09,991 [dualprompt.py] => Task 9, Epoch 5/5 => Loss 0.436, Train_accy 86.74, Test_accy 67.98
+
+2023-11-14 17:28:41,409 [trainer.py] => No NME accuracy.
+2023-11-14 17:28:41,409 [trainer.py] => CNN: {'total': 67.98, '00-19': 69.81, '20-39': 72.78, '40-59': 68.48, '60-79': 67.25, '80-99': 66.12, '100-119': 66.21, '120-139': 66.78, '140-159': 74.9, '160-179': 62.55, '180-199': 61.31, 'old': 68.7, 'new': 61.31}
+2023-11-14 17:28:41,410 [trainer.py] => CNN top1 curve: [84.47, 81.0, 77.11, 75.1, 72.53, 71.22, 70.43, 70.32, 69.49, 67.98]
+2023-11-14 17:28:41,410 [trainer.py] => CNN top5 curve: [96.81, 93.57, 91.07, 89.27, 87.81, 87.33, 86.47, 86.38, 85.56, 84.93]
+
+Average Accuracy (CNN): 73.96499999999999
+2023-11-14 17:28:41,410 [trainer.py] => Average Accuracy (CNN): 73.96499999999999 
+
