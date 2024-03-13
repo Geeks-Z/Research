@@ -9,7 +9,7 @@
     "increment": 20,
     "model_name": "adam_adapter",
     "convnet_type": "pretrained_vit_b16_224_in21k_adapter",
-    "device": ["3"],
+    "device": ["5"],
     "seed": [1993],
     
     "tuned_epoch":20,

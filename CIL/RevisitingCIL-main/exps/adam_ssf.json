@@ -5,13 +5,13 @@
     "memory_per_class": 0,
     "fixed_memory": false,
     "shuffle": true,
-    "init_cls": 10,
+    "init_cls": 50,
     "increment": 10,
     "model_name": "adam_ssf",
     "convnet_type": "pretrained_vit_b16_224_in21k_ssf",
-    "device": ["5"],
+    "device": ["1"],
     "seed": [1993],
-    
+
     "tuned_epoch":20,
     "init_lr":0.01,
     "batch_size":48,
