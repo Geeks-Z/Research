@@ -7,6 +7,7 @@ from utils.data_manager import DataManager
 from utils.toolkit import count_parameters
 import os
 
+import timm
 
 def train(args):
     seed_list = copy.deepcopy(args["seed"])
@@ -60,7 +61,9 @@ def _train(args):
     args["nb_classes"] = data_manager.nb_classes # update args
     args["nb_tasks"] = data_manager.nb_tasks
     model = factory.get_model(args["model_name"], args)
-
+    # model = timm.create_model("vit_base_patch16_224_in21k", pretrained=True, num_classes=0)
+    # net = lora_model.to(args["device"])
+    # print_trainable_parameters(lora_model)
     cnn_curve, nme_curve = {"top1": [], "top5": []}, {"top1": [], "top5": []}
     for task in range(data_manager.nb_tasks):
         logging.info("All params: {}".format(count_parameters(model._network)))
@@ -119,7 +122,6 @@ def _set_device(args):
 
     args["device"] = gpus
 
-
 def _set_random(seed=1):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
@@ -127,7 +129,22 @@ def _set_random(seed=1):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-
 def print_args(args):
     for key, value in args.items():
         logging.info("{}: {}".format(key, value))
+
+def print_trainable_parameters(model):
+    """
+    Prints the number of trainable parameters in the model.
+    """
+    trainable_params = 0
+    all_param = 0
+    for _, param in model.named_parameters():
+        all_param += param.numel()
+        if param.requires_grad:
+            trainable_params += param.numel()
+    print(
+        f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param:.2f}"
+    )
+
+

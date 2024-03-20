@@ -5,6 +5,7 @@ from torch import nn
 from backbone.linears import SimpleLinear, SplitCosineLinear, CosineLinear
 from backbone.prompt import CodaPrompt
 import timm
+from peft import LoraConfig, get_peft_model
 
 def get_backbone(args, pretrained=False):
     name = args["backbone_type"].lower()
@@ -93,6 +94,36 @@ def get_backbone(args, pretrained=False):
             return model.eval()
         else:
             raise NotImplementedError("Inconsistent model name and model type")
+
+    #lora
+    elif 'lora' in name:
+        if args["model_name"] == "lora":
+            if name == "pretrained_vit_b16_224_lora":
+                model = timm.create_model("vit_base_patch16_224", pretrained=True, num_classes=0)
+                model = get_peft_model(model, LoraConfig(
+                    r=args["lora_r"],  # 分解的秩
+                    lora_alpha=args["lora_alpha"],  # ΔW 按 α / r 缩放，其中 α 是常数, 默认将 α 设置为第一个 r 并且不对其进行调整。 默认值为 8
+                    target_modules=args["target_modules"],  # 定义需要做低秩适配的部分
+                    lora_dropout=args["lora_dropout"],
+                    bias=args["lora_bias"],
+                    modules_to_save=args["modules_to_save"]
+                ))
+                model.out_dim = 768
+            elif name == "pretrained_vit_b16_224_in21k_lora":
+                model = timm.create_model("vit_base_patch16_224_in21k", pretrained=True, num_classes=0)
+                model = get_peft_model(model, LoraConfig(
+                    r=args["lora_r"],  # 分解的秩
+                    lora_alpha=args["lora_alpha"],  # ΔW 按 α / r 缩放，其中 α 是常数, 默认将 α 设置为第一个 r 并且不对其进行调整。 默认值为 8
+                    target_modules=args["target_modules"],  # 定义需要做低秩适配的部分
+                    lora_dropout=args["lora_dropout"],
+                    bias=args["lora_bias"],
+                    modules_to_save=args["modules_to_save"]
+                ))
+                model.out_dim = 768
+            return model.eval()
+        else:
+            raise NotImplementedError("Inconsistent model name and model type")
+
     # L2P
     elif '_l2p' in name:
         if args["model_name"] == "l2p":
@@ -897,3 +928,8 @@ class AdaptiveNet(nn.Module):
         self.fc.load_state_dict(model_infos['fc'])
         test_acc = model_infos['test_acc']
         return test_acc
+
+class LoraNet(BaseNet):
+
+    def __init__(self, args, pretrained):
+        super().__init__(args, pretrained)

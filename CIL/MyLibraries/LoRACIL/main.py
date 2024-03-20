@@ -1,16 +1,25 @@
-import timm
-model = timm.create_model("vit_base_patch16_224_in21k",pretrained=True, num_classes=0)
-print(model)
+import json
+import argparse
+from train import train
 
-# from peft import LoraConfig, get_peft_model
-#
-# config = LoraConfig(
-#     r=16,
-#     lora_alpha=16,
-#     target_modules=["query", "value"], # 定义需要做低秩适配的部分
-#     lora_dropout=0.1,
-#     bias="none",
-#     modules_to_save=["classifier"],
-# )
-# lora_model = get_peft_model(model, config)
-# print_trainable_parameters(lora_model)
+def main():
+    args = setup_parser().parse_args()
+    param = load_json(args.config)
+    args = vars(args) # Converting argparse Namespace to a dict.
+    args.update(param) # Add parameters from json
+
+    train(args)
+
+def load_json(setting_path):
+    with open(setting_path) as data_file:
+        param = json.load(data_file)
+    return param
+
+def setup_parser():
+    parser = argparse.ArgumentParser(description='Reproduce of multiple pre-trained incremental learning algorthms.')
+    parser.add_argument('--config', type=str, default='./exps/simplecil.json',
+                        help='Json file of settings.')
+    return parser
+
+if __name__ == '__main__':
+    main()

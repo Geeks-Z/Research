@@ -18,7 +18,12 @@
     "weight_decay": 0.05,
     "min_lr": 1e-8,
     "optimizer": "sgd",
-    "vpt_type": "shallow",
-    "prompt_token_num": 3
+
+    "lora_r": 16,
+    "lora_alpha": 16,
+    "target_modules":["q", "v"],
+    "lora_dropout":0.1,
+    "lora_bias": "none",
+    "modules_to_save":["classifier"]
 }
 

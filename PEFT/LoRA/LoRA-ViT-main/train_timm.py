@@ -83,7 +83,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-bs", type=int, default=16)
     parser.add_argument("-fold", type=int, default=0)
-    parser.add_argument("-data_path",type=str, default='../data/NIH_X-ray/')
+    parser.add_argument("-data_path",type=str, default='/home/team/zhaohongwei/Dataset/cifar100')
     parser.add_argument("-data_info",type=str,default='nih_split_712.json')
     parser.add_argument("-annotation",type=str,default='Data_Entry_2017_jpg.csv')
     parser.add_argument("-lr", type=float, default=1e-3)
