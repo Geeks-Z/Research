@@ -21,16 +21,9 @@ class Learner(BaseLearner):
         self._network = LoraNet(args, True)
         self.batch_size = 128
         self.init_lr = args["init_lr"] if args["init_lr"] is not None else 0.01
-
-    else:
-    self._network = SimpleVitNet(args, True)
-    self.batch_size = args["batch_size"]
-    self.init_lr = args["init_lr"]
-
-
-self.weight_decay = args["weight_decay"] if args["weight_decay"] is not None else 0.0005
-self.min_lr = args['min_lr'] if args['min_lr'] is not None else 1e-8
-self.args = args
+        self.weight_decay = args["weight_decay"] if args["weight_decay"] is not None else 0.0005
+        self.min_lr = args['min_lr'] if args['min_lr'] is not None else 1e-8
+        self.args = args
 
 
 def after_task(self):
@@ -104,12 +97,6 @@ def _train(self, train_loader, test_loader, train_loader_for_protonet):
     else:
         pass
     self.replace_fc(train_loader_for_protonet, self._network, None)
-
-
-def construct_dual_branch_network(self):
-    network = MultiBranchCosineIncrementalNet(self.args, True)
-    network.construct_dual_branch_network(self._network)
-    self._network = network.to(self._device)
 
 
 def _init_train(self, train_loader, test_loader, optimizer, scheduler):
