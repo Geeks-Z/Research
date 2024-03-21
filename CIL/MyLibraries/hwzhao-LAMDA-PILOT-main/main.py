@@ -16,8 +16,10 @@ def load_json(setting_path):
     return param
 
 def setup_parser():
+    # 定义一个ArgumentParser实例
     parser = argparse.ArgumentParser(description='Reproduce of multiple pre-trained incremental learning algorthms.')
-    parser.add_argument('--config', type=str, default='./exps/lora.json',
+    # 定义参数
+    parser.add_argument('--config', type=str, default='./exps/l2p.json',
                         help='Json file of settings.')
     return parser
 
