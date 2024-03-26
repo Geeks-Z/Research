@@ -95,8 +95,8 @@ def get_backbone(args, pretrained=False):
         else:
             raise NotImplementedError("Inconsistent model name and model type")
 
-    #lora
-    elif 'lora' in name:
+    # lora
+    elif '_lora' in name:
         if args["model_name"] == "lora":
             if name == "pretrained_vit_b16_224_lora":
                 model = timm.create_model("vit_base_patch16_224", pretrained=True, num_classes=0)
@@ -120,6 +120,40 @@ def get_backbone(args, pretrained=False):
                     modules_to_save=args["modules_to_save"]
                 ))
                 model.out_dim = 768
+            return model.eval()
+        else:
+            raise NotImplementedError("Inconsistent model name and model type")
+
+    # loramoe
+    elif '_moe' in name:
+        ffn_num = args["ffn_num"]
+        if args["model_name"] == "loramoe" :
+            from backbone import vision_transformer_loramoe
+            from easydict import EasyDict
+            tuning_config = EasyDict(
+                # AdaptFormer
+                ffn_adapt=True,
+                ffn_option="parallel",
+                ffn_adapter_layernorm_option="none",
+                ffn_adapter_init_option="lora",
+                ffn_adapter_scalar="0.1",
+                ffn_num=ffn_num,
+                d_model=768,
+                # VPT related
+                vpt_on=False,
+                vpt_num=0,
+                expert_num = args["expert_num"]
+            )
+            if name == "pretrained_vit_b16_224_moe":
+                model = vision_transformer_loramoe.vit_base_patch16_224_moe(num_classes=0,
+                    global_pool=False, drop_path_rate=0.0, tuning_config=tuning_config)
+                model.out_dim=768
+            elif name == "pretrained_vit_b16_224_in21k_moe":
+                model = vision_transformer_loramoe.vit_base_patch16_224_in21k_moe(num_classes=0,
+                    global_pool=False, drop_path_rate=0.0, tuning_config=tuning_config)
+                model.out_dim=768
+            else:
+                raise NotImplementedError("Unknown type {}".format(name))
             return model.eval()
         else:
             raise NotImplementedError("Inconsistent model name and model type")
@@ -931,6 +965,38 @@ class AdaptiveNet(nn.Module):
 
 class LoraNet(BaseNet):
 
+    def __init__(self, args, pretrained):
+        super().__init__(args, pretrained)
+
+    def update_fc(self, nb_classes, nextperiod_initialization=None):
+        fc = self.generate_fc(self.feature_dim, nb_classes).to(self._device)
+        if self.fc is not None:
+            nb_output = self.fc.out_features
+            weight = copy.deepcopy(self.fc.weight.data)
+            fc.sigma.data = self.fc.sigma.data
+            if nextperiod_initialization is not None:
+                weight = torch.cat([weight, nextperiod_initialization])
+            else:
+                weight = torch.cat([weight, torch.zeros(nb_classes - nb_output, self.feature_dim).to(self._device)])
+            fc.weight = nn.Parameter(weight)
+        del self.fc
+        self.fc = fc
+
+    def generate_fc(self, in_dim, out_dim):
+        fc = CosineLinear(in_dim, out_dim)
+        return fc
+
+    def extract_vector(self, x):
+        return self.backbone(x)
+
+    def forward(self, x):
+        x = self.backbone(x)
+        out = self.fc(x)
+        out.update({"features": x})
+        return out
+
+
+class LoRAMoENet(BaseNet):
     def __init__(self, args, pretrained):
         super().__init__(args, pretrained)
 

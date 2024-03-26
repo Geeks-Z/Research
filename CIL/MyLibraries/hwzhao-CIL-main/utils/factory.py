@@ -28,8 +28,10 @@ def get_model(model_name, args):
         from models.foster import Learner
     elif name == "memo":
         from models.memo import Learner
-    elif name =="lora":
+    elif name == "lora":
         from models.lora import Learner
+    elif name == "loramoe":
+        from models.loramoe import Learner
     else:
         assert 0
     

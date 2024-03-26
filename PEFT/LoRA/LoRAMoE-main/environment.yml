@@ -1,4 +1,4 @@
-name: newloramoe
+name: loramoe
 channels:
   - pytorch
   - huggingface
