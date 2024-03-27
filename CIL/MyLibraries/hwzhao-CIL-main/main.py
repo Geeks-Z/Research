@@ -19,7 +19,7 @@ def setup_parser():
     # 定义一个ArgumentParser实例
     parser = argparse.ArgumentParser(description='Reproduce of multiple pre-trained incremental learning algorthms.')
     # 定义参数
-    parser.add_argument('--config', type=str, default='./exps/loramoe.json',
+    parser.add_argument('--config', type=str, default='./exps/loramoe_inc.json',
                         help='Json file of settings.')
     return parser
 

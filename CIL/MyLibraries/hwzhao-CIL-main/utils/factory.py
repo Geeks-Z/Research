@@ -32,6 +32,8 @@ def get_model(model_name, args):
         from models.lora import Learner
     elif name == "loramoe":
         from models.loramoe import Learner
+    elif name == "loramoeinc":
+        from models.loramoeinc import Learner
     else:
         assert 0
     

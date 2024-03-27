@@ -5,14 +5,14 @@
     "memory_per_class": 0,
     "fixed_memory": false,
     "shuffle": true,
-    "init_cls": 50,
-    "increment": 10,
-    "model_name": "adam_adapter",
-    "backbone_type": "pretrained_vit_b16_224_adapter",
-    "device": ["1"],
+    "init_cls": 20,
+    "increment": 20,
+    "model_name": "loramoeinc",
+    "backbone_type": "pretrained_vit_b16_224_inc",
+    "device": ["5"],
     "seed": [1993],
     
-    "tuned_epoch":1,
+    "tuned_epoch":20,
     "init_lr":0.01,
     "batch_size":48,
     "weight_decay":0.0005,
@@ -20,6 +20,8 @@
     "ffn_num":64,
     "optimizer":"sgd",
     "vpt_type":"shallow",
-    "prompt_token_num":5
+    "prompt_token_num":5,
+
+    "expert_num": 5
 }
 
