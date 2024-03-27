@@ -371,7 +371,7 @@ def vit_base_patch16_224_moe(pretrained=False, **kwargs):
             state_dict[key.replace('mlp.', '')] = fc_weight
 
     msg = model.load_state_dict(state_dict, strict=False)
-    print(msg)
+    # print(msg)
 
     # s=model.state_dict()
     # # print the keys in s
@@ -388,7 +388,6 @@ def vit_base_patch16_224_moe(pretrained=False, **kwargs):
     for name, p in model.named_parameters():
         if name in msg.missing_keys:
             p.requires_grad = True
-            print(name)
         else:
             p.requires_grad = False
     return model

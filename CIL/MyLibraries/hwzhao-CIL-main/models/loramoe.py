@@ -8,7 +8,7 @@ from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from models.base import BaseLearner
 from utils.toolkit import tensor2numpy
-from utils.inc_net import LoRAMoENet
+from utils.inc_net import LoRAMoENet, MultiBranchCosineIncrementalNet
 
 num_workers = 8
 
@@ -79,6 +79,16 @@ class Learner(BaseLearner):
     def _train(self, train_loader, test_loader, train_loader_for_protonet):
         self._network.to(self._device)
         if self._cur_task == 0:
+            # show total parameters and trainable parameters
+            total_params = sum(p.numel() for p in self._network.parameters())
+            print(f'{total_params:,} total parameters.')
+            total_trainable_params = sum(
+                p.numel() for p in self._network.parameters() if p.requires_grad)
+            print(f'{total_trainable_params:,} training parameters.')
+            if total_params != total_trainable_params:
+                for name, param in self._network.named_parameters():
+                    if param.requires_grad:
+                        print(name, param.numel())
             if self.args['optimizer'] == 'sgd':
                 optimizer = optim.SGD(self._network.parameters(), momentum=0.9, lr=self.init_lr,
                                       weight_decay=self.weight_decay)
@@ -87,10 +97,15 @@ class Learner(BaseLearner):
             scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.args['tuned_epoch'],
                                                              eta_min=self.min_lr)
             self._init_train(train_loader, test_loader, optimizer, scheduler)
+            self.construct_dual_branch_network()
         else:
             pass
         self.replace_fc(train_loader_for_protonet, self._network, None)
 
+    def construct_dual_branch_network(self):
+        network = MultiBranchCosineIncrementalNet(self.args, True)
+        network.construct_dual_branch_network(self._network)
+        self._network=network.to(self._device)
     def _init_train(self, train_loader, test_loader, optimizer, scheduler):
         prog_bar = tqdm(range(self.args['tuned_epoch']))
         for _, epoch in enumerate(prog_bar):

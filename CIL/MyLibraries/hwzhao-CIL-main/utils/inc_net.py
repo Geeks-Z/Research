@@ -6,7 +6,7 @@ from backbone.linears import SimpleLinear, SplitCosineLinear, CosineLinear
 from backbone.prompt import CodaPrompt
 import timm
 from peft import LoraConfig, get_peft_model
-
+import math
 def get_backbone(args, pretrained=False):
     name = args["backbone_type"].lower()
     # SimpleCIL or SimpleCIL w/ Finetune
@@ -1026,3 +1026,7 @@ class LoRAMoENet(BaseNet):
         out = self.fc(x)
         out.update({"features": x})
         return out
+
+class LoRAMoEIncNet(BaseNet):
+    # TODO
+    pass
