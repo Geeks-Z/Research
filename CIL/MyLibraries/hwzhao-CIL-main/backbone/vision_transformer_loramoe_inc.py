@@ -63,7 +63,7 @@ class Adapter(nn.Module):
         residual = x if residual is None else residual
         # route_weight = nn.functional.softmax(self.lora_route(x[:, 0, :]), dtype=torch.float32)
         down = self.expert_lora.down_proj(x)
-        up = self.expert_loras.up_proj(down)
+        up = self.expert_lora.up_proj(down)
         if add_residual:
             output = up + residual
         else:
@@ -125,8 +125,8 @@ class Block(nn.Module):
         self.norm1 = norm_layer(dim)
         self.attn = Attention(dim, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop)
         # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here
-        # self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
-        # self.norm2 = norm_layer(dim)
+        self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
+        self.norm2 = norm_layer(dim)
         # mlp_hidden_dim = int(dim * mlp_ratio)
         #
         # self.fc1 = nn.Linear(dim, mlp_hidden_dim)
@@ -145,20 +145,23 @@ class Block(nn.Module):
         x = x + self.drop_path(self.attn(self.norm1(x)))
         if self.config.ffn_adapt and self.config.ffn_option == 'parallel':
             adapt_x = self.adaptmlp(x, add_residual=False)
+            return x + adapt_x
 
-        residual = x
-        x = self.mlp_drop(self.act(self.fc1(self.norm2(x))))
-        x = self.drop_path(self.mlp_drop(self.fc2(x)))
+        # residual = x
 
-        if self.config.ffn_adapt:
-            if self.config.ffn_option == 'sequential':
-                x = self.adaptmlp(x)
-            elif self.config.ffn_option == 'parallel':
-                x = x + adapt_x
-            else:
-                raise ValueError(self.config.ffn_adapt)
+        # x = self.mlp_drop(self.act(self.fc1(self.norm2(x))))
+        # x = self.drop_path(self.mlp_drop(self.fc2(x)))
 
-        x = residual + x
+        # if self.config.ffn_adapt:
+        #     if self.config.ffn_option == 'sequential':
+        #         x = self.adaptmlp(x)
+        #     elif self.config.ffn_option == 'parallel':
+        #         x = x + adapt_x
+        #     else:
+        #         raise ValueError(self.config.ffn_adapt)
+        #
+        # x = residual + x
+
         return x
 
 
