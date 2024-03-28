@@ -55,10 +55,10 @@ class Adapter(nn.Module):
             raise NotImplementedError
         elif init_option == "lora":
             with torch.no_grad():
-                nn.init.kaiming_uniform_(self.expert_lora.down_proj, a=math.sqrt(5))
-                nn.init.zeros_(self.expert_lora.up_proj)
-                nn.init.zeros_(self.down_proj.bias)
-                nn.init.zeros_(self.up_proj.bias)
+                nn.init.kaiming_uniform_(self.expert_lora.down_proj.weight, a=math.sqrt(5))
+                nn.init.zeros_(self.expert_lora.up_proj.weight)
+                nn.init.zeros_(self.expert_lora.down_proj.bias)
+                nn.init.zeros_(self.expert_lora.up_proj.bias)
         self.expert_loras = nn.ModuleList([self.expert_lora for i in range(config.expert_num)])
         self.dropout = dropout
 
@@ -139,9 +139,9 @@ class Block(nn.Module):
         self.norm2 = norm_layer(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
 
-        self.fc1 = nn.Linear(dim, mlp_hidden_dim)
-        self.fc2 = nn.Linear(mlp_hidden_dim, dim)
-        self.act = act_layer()
+        # self.fc1 = nn.Linear(dim, mlp_hidden_dim)
+        # self.fc2 = nn.Linear(mlp_hidden_dim, dim)
+        # self.act = act_layer()
         self.mlp_drop = nn.Dropout(drop)
 
         if config.ffn_adapt:
@@ -154,21 +154,23 @@ class Block(nn.Module):
     def forward(self, x):
         x = x + self.drop_path(self.attn(self.norm1(x)))
         if self.config.ffn_adapt and self.config.ffn_option == 'parallel':
-            adapt_x = self.adaptmlp(x, add_residual=False)
+            adapt_x = self.adaptmlp(self.norm2(x), add_residual=False)
+            adapt_x = self.mlp_drop(adapt_x)
+            return x + adapt_x
 
-        residual = x
-        x = self.mlp_drop(self.act(self.fc1(self.norm2(x))))
-        x = self.drop_path(self.mlp_drop(self.fc2(x)))
+        # residual = x
+        # x = self.mlp_drop(self.act(self.fc1(self.norm2(x))))
+        # x = self.drop_path(self.mlp_drop(self.fc2(x)))
 
-        if self.config.ffn_adapt:
-            if self.config.ffn_option == 'sequential':
-                x = self.adaptmlp(x)
-            elif self.config.ffn_option == 'parallel':
-                x = x + adapt_x
-            else:
-                raise ValueError(self.config.ffn_adapt)
-
-        x = residual + x
+        # if self.config.ffn_adapt:
+        #     if self.config.ffn_option == 'sequential':
+        #         x = self.adaptmlp(x)
+        #     elif self.config.ffn_option == 'parallel':
+        #         x = x + adapt_x
+        #     else:
+        #         raise ValueError(self.config.ffn_adapt)
+        #
+        # x = residual + x
         return x
 
 
