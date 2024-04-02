@@ -7,6 +7,7 @@ import math
 import torch
 import torch.nn as nn
 from timm.models.layers import DropPath
+from torchinfo import summary
 # --------------------------------------------------------
 # References:
 # timm: https://github.com/rwightman/pytorch-image-models/tree/master/timm
@@ -40,26 +41,39 @@ class Adapter(nn.Module):
         self.expert_num = config.expert_num
         # 路由
         self.lora_route = nn.Linear(config.d_model, config.expert_num, bias=False)
-        nn.init.kaiming_uniform_(self.lora_route.weight, a=math.sqrt(5))
+        nn.init.ones_(self.lora_route.weight)
+        # nn.init.kaiming_uniform_(self.lora_route.weight, a=math.sqrt(5))
 
         self.n_embd = config.d_model if d_model is None else d_model
         self.down_size = config.attn_bn if bottleneck is None else bottleneck
 
-        self.expert_lora = nn.ModuleDict(
+        # self.down_proj = nn.Linear(config.d_model, self.down_size)
+        # self.up_proj = nn.Linear(self.down_size, config.d_model)
+        # self.expert_lora = nn.ModuleDict(
+        #     {
+        #         'down_proj': nn.Linear(config.d_model, self.down_size),
+        #         'up_proj': nn.Linear(self.down_size, config.d_model)
+        #     }
+        # )
+        # if init_option == "bert":
+        #     raise NotImplementedError
+        # elif init_option == "lora":
+        #     with torch.no_grad():
+        #         nn.init.kaiming_uniform_(self.expert_lora.down_proj.weight, a=math.sqrt(5))
+        #         nn.init.zeros_(self.expert_lora.up_proj.weight)
+        #         nn.init.zeros_(self.expert_lora.down_proj.bias)
+        #         nn.init.zeros_(self.expert_lora.up_proj.bias)
+        #         nn.init.kaiming_uniform_(self.down_proj.weight, a=math.sqrt(5))
+        #         nn.init.zeros_(self.up_proj.weight)
+        #         nn.init.zeros_(self.down_proj.bias)
+        #         nn.init.zeros_(self.up_proj.bias)
+        # self.expert_loras = nn.ModuleList(self.expert_lora for i in range(config.expert_num))
+        self.expert_loras = nn.ModuleList(nn.ModuleDict(
             {
                 'down_proj': nn.Linear(config.d_model, self.down_size),
                 'up_proj': nn.Linear(self.down_size, config.d_model)
             }
-        )
-        if init_option == "bert":
-            raise NotImplementedError
-        elif init_option == "lora":
-            with torch.no_grad():
-                nn.init.kaiming_uniform_(self.expert_lora.down_proj.weight, a=math.sqrt(5))
-                nn.init.zeros_(self.expert_lora.up_proj.weight)
-                nn.init.zeros_(self.expert_lora.down_proj.bias)
-                nn.init.zeros_(self.expert_lora.up_proj.bias)
-        self.expert_loras = nn.ModuleList([self.expert_lora for i in range(config.expert_num)])
+        ) for i in range(config.expert_num))
         self.dropout = dropout
 
 
@@ -67,12 +81,13 @@ class Adapter(nn.Module):
         residual = x if residual is None else residual
         route_weight = nn.functional.softmax(self.lora_route(x[:, 0, :]), dtype=torch.float32)
 
-        features = torch.zeros(x.shape,device=x.device)
-        for i in range(self.expert_num):
-            down = self.expert_loras[i].down_proj(x)
-            up = self.expert_loras[i].up_proj(down)
-            features += torch.mul(up.permute(1,2,0),route_weight[:,i]).permute(2,0,1)
-            i += 1
+        features = torch.zeros(x.shape, device=x.device)
+        if self.expert_num:
+            for i in range(self.expert_num):
+                down = self.expert_loras[i].down_proj(x)
+                up = self.expert_loras[i].up_proj(down)
+                features += torch.mul(up.permute(1, 2, 0), route_weight[:, i]).permute(2, 0, 1)
+                i += 1
 
         if add_residual:
             output = features + residual
@@ -136,12 +151,13 @@ class Block(nn.Module):
         self.attn = Attention(dim, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop)
         # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
+        # VIT中的MLP 参数固定不训练
         self.norm2 = norm_layer(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
 
-        # self.fc1 = nn.Linear(dim, mlp_hidden_dim)
-        # self.fc2 = nn.Linear(mlp_hidden_dim, dim)
-        # self.act = act_layer()
+        self.fc1 = nn.Linear(dim, mlp_hidden_dim)
+        self.fc2 = nn.Linear(mlp_hidden_dim, dim)
+        self.act = act_layer()
         self.mlp_drop = nn.Dropout(drop)
 
         if config.ffn_adapt:
@@ -152,25 +168,17 @@ class Block(nn.Module):
                                     )
 
     def forward(self, x):
+        # 残差 + attention层输出
         x = x + self.drop_path(self.attn(self.norm1(x)))
-        if self.config.ffn_adapt and self.config.ffn_option == 'parallel':
-            adapt_x = self.adaptmlp(self.norm2(x), add_residual=False)
-            adapt_x = self.mlp_drop(adapt_x)
-            return x + adapt_x
-
-        # residual = x
-        # x = self.mlp_drop(self.act(self.fc1(self.norm2(x))))
-        # x = self.drop_path(self.mlp_drop(self.fc2(x)))
-
-        # if self.config.ffn_adapt:
-        #     if self.config.ffn_option == 'sequential':
-        #         x = self.adaptmlp(x)
-        #     elif self.config.ffn_option == 'parallel':
-        #         x = x + adapt_x
-        #     else:
-        #         raise ValueError(self.config.ffn_adapt)
-        #
-        # x = residual + x
+        residual = x
+        # mlp层输出
+        mlp_out = self.mlp_drop(self.act(self.fc1(self.norm2(x))))
+        mlp_out = self.drop_path(self.mlp_drop(self.fc2(mlp_out)))
+        # lora-expert层输出
+        if self.config.ffn_adapt:
+            lora_expert = self.adaptmlp(self.norm2(x), add_residual=False)
+            return mlp_out + residual + lora_expert
+        x = residual + mlp_out
         return x
 
 
@@ -185,7 +193,7 @@ class VisionTransformer(nn.Module):
                  act_layer=None, weight_init='', tuning_config=None):
         super().__init__()
 
-        print("I'm using ViT with adapters.")
+        # print("I'm using ViT with adapters.")
         self.tuning_config = tuning_config
         self.num_classes = num_classes
         self.num_features = self.embed_dim = embed_dim  # num_features for consistency with other models
@@ -388,12 +396,20 @@ def vit_base_patch16_224_moe(pretrained=False, **kwargs):
     #     else:
     #         print(key, 'NOOOOOOOOOOOOOOOOOOO')
 
-    # freeze all but the adapter
+    # freeze all but the lora-expert
     for name, p in model.named_parameters():
         if name in msg.missing_keys:
             p.requires_grad = True
+            if 'down' in name and 'weight' in name:
+                nn.init.kaiming_uniform_(p, a=math.sqrt(5))
+            else:
+                nn.init.zeros_(p)
+            # print(name)
         else:
             p.requires_grad = False
+    # 打印网络结构
+    # summary(model,(128,3,224,224))
+
     return model
 
 
@@ -450,4 +466,3 @@ def vit_base_patch16_224_in21k_moe(pretrained=False, **kwargs):
         else:
             p.requires_grad = False
     return model
-
