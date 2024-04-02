@@ -88,6 +88,15 @@ class Learner(BaseLearner):
         
         self._network.to(self._device)
         if self._cur_task == 0:
+            total_params = sum(p.numel() for p in self._network.parameters())
+            print(f'{total_params:,} total parameters.')
+            total_trainable_params = sum(
+                p.numel() for p in self._network.parameters() if p.requires_grad)
+            print(f'{total_trainable_params:,} training parameters.')
+            if total_params != total_trainable_params:
+                for name, param in self._network.named_parameters():
+                    if param.requires_grad:
+                        print(name, param.numel())
             if self.args['optimizer']=='sgd':
                 optimizer = optim.SGD(self._network.parameters(), momentum=0.9, lr=self.init_lr,weight_decay=self.weight_decay)
             elif self.args['optimizer']=='adam':
