@@ -27,7 +27,6 @@ from collections import OrderedDict
 import torch
 
 
-
 class Adapter(nn.Module):
     def __init__(self,
                  config=None,
@@ -41,7 +40,7 @@ class Adapter(nn.Module):
         self.n_embd = config.d_model if d_model is None else d_model
         self.down_size = config.attn_bn if bottleneck is None else bottleneck
 
-        #_before
+        # _before
         self.adapter_layernorm_option = adapter_layernorm_option
 
         self.adapter_layer_norm_before = None
@@ -90,11 +89,8 @@ class Adapter(nn.Module):
         return output
 
 
-
-
-
 class Attention(nn.Module):
-    def __init__(self, dim, num_heads=8, qkv_bias=False, attn_drop=0., proj_drop=0.,):
+    def __init__(self, dim, num_heads=8, qkv_bias=False, attn_drop=0., proj_drop=0., ):
         super().__init__()
         self.num_heads = num_heads
         head_dim = dim // num_heads
@@ -183,18 +179,16 @@ class Block(nn.Module):
         return x
 
 
-
-
-
 class VisionTransformer(nn.Module):
     """ Vision Transformer with support for global average pooling
     """
-    def __init__(self, global_pool=False, img_size=224, patch_size=16, in_chans=3, num_classes=1000, embed_dim=768, depth=12,
+
+    def __init__(self, global_pool=False, img_size=224, patch_size=16, in_chans=3, num_classes=1000, embed_dim=768,
+                 depth=12,
                  num_heads=12, mlp_ratio=4., qkv_bias=True, representation_size=None, distilled=False,
                  drop_rate=0., attn_drop_rate=0., drop_path_rate=0., embed_layer=PatchEmbed, norm_layer=None,
                  act_layer=None, weight_init='', tuning_config=None):
         super().__init__()
-
 
         print("I'm using ViT with adapters.")
         self.tuning_config = tuning_config
@@ -304,7 +298,7 @@ class VisionTransformer(nn.Module):
         return outcome
 
     def forward(self, x):
-        x = self.forward_features(x,)
+        x = self.forward_features(x, )
         if self.head_dist is not None:
             x, x_dist = self.head(x[0]), self.head_dist(x[1])  # x must be a tuple
             if self.training and not torch.jit.is_scripting():
@@ -352,15 +346,12 @@ class VisionTransformer(nn.Module):
 #     return model
 
 
-
-
 def vit_base_patch16_224_adapter(pretrained=False, **kwargs):
-    
     model = VisionTransformer(patch_size=16, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, qkv_bias=True,
-        norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
+                              norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
 
     # checkpoint_model = torch.load('./pretrained_models/B_16-i21k-300ep-lr_0.001-aug_medium1-wd_0.1-do_0.0-sd_0.0.npz')
-    checkpoint_model=timm.create_model("vit_base_patch16_224", pretrained=True, num_classes=0)
+    checkpoint_model = timm.create_model("vit_base_patch16_224", pretrained=True, num_classes=0)
     state_dict = checkpoint_model.state_dict()
     # modify the checkpoint state dict to match the model
     # first, split qkv weight into q, k, v
@@ -368,16 +359,16 @@ def vit_base_patch16_224_adapter(pretrained=False, **kwargs):
         if 'qkv.weight' in key:
             qkv_weight = state_dict.pop(key)
             q_weight = qkv_weight[:768]
-            k_weight = qkv_weight[768:768*2]
-            v_weight = qkv_weight[768*2:]
+            k_weight = qkv_weight[768:768 * 2]
+            v_weight = qkv_weight[768 * 2:]
             state_dict[key.replace('qkv.weight', 'q_proj.weight')] = q_weight
             state_dict[key.replace('qkv.weight', 'k_proj.weight')] = k_weight
             state_dict[key.replace('qkv.weight', 'v_proj.weight')] = v_weight
         elif 'qkv.bias' in key:
             qkv_bias = state_dict.pop(key)
             q_bias = qkv_bias[:768]
-            k_bias = qkv_bias[768:768*2]
-            v_bias = qkv_bias[768*2:]
+            k_bias = qkv_bias[768:768 * 2]
+            v_bias = qkv_bias[768 * 2:]
             state_dict[key.replace('qkv.bias', 'q_proj.bias')] = q_bias
             state_dict[key.replace('qkv.bias', 'k_proj.bias')] = k_bias
             state_dict[key.replace('qkv.bias', 'v_proj.bias')] = v_bias
@@ -406,18 +397,16 @@ def vit_base_patch16_224_adapter(pretrained=False, **kwargs):
         if name in msg.missing_keys:
             p.requires_grad = True
         else:
-            p.requires_grad = False 
+            p.requires_grad = False
     return model
 
 
-
 def vit_base_patch16_224_in21k_adapter(pretrained=False, **kwargs):
-    
     model = VisionTransformer(patch_size=16, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, qkv_bias=True,
-        norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
+                              norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
 
     # checkpoint_model = torch.load('./pretrained_models/B_16-i21k-300ep-lr_0.001-aug_medium1-wd_0.1-do_0.0-sd_0.0.npz')
-    checkpoint_model=timm.create_model("vit_base_patch16_224_in21k", pretrained=True, num_classes=0)
+    checkpoint_model = timm.create_model("vit_base_patch16_224_in21k", pretrained=True, num_classes=0)
     state_dict = checkpoint_model.state_dict()
     # modify the checkpoint state dict to match the model
     # first, split qkv weight into q, k, v
@@ -425,16 +414,16 @@ def vit_base_patch16_224_in21k_adapter(pretrained=False, **kwargs):
         if 'qkv.weight' in key:
             qkv_weight = state_dict.pop(key)
             q_weight = qkv_weight[:768]
-            k_weight = qkv_weight[768:768*2]
-            v_weight = qkv_weight[768*2:]
+            k_weight = qkv_weight[768:768 * 2]
+            v_weight = qkv_weight[768 * 2:]
             state_dict[key.replace('qkv.weight', 'q_proj.weight')] = q_weight
             state_dict[key.replace('qkv.weight', 'k_proj.weight')] = k_weight
             state_dict[key.replace('qkv.weight', 'v_proj.weight')] = v_weight
         elif 'qkv.bias' in key:
             qkv_bias = state_dict.pop(key)
             q_bias = qkv_bias[:768]
-            k_bias = qkv_bias[768:768*2]
-            v_bias = qkv_bias[768*2:]
+            k_bias = qkv_bias[768:768 * 2]
+            v_bias = qkv_bias[768 * 2:]
             state_dict[key.replace('qkv.bias', 'q_proj.bias')] = q_bias
             state_dict[key.replace('qkv.bias', 'k_proj.bias')] = k_bias
             state_dict[key.replace('qkv.bias', 'v_proj.bias')] = v_bias
@@ -463,6 +452,6 @@ def vit_base_patch16_224_in21k_adapter(pretrained=False, **kwargs):
         if name in msg.missing_keys:
             p.requires_grad = True
         else:
-            p.requires_grad = False 
+            p.requires_grad = False
     return model
 
