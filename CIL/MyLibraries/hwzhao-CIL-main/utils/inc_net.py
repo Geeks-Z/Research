@@ -274,9 +274,9 @@ class BaseNet(nn.Module):
     def __init__(self, args, pretrained):
         super(BaseNet, self).__init__()
 
-        print('This is for the BaseNet initialization.')
+        # print('This is for the BaseNet initialization.')
         self.backbone = get_backbone(args, pretrained)
-        print('After BaseNet initialization.')
+        # print('After BaseNet initialization.')
         self.fc = None
         self._device = args["device"][0]
 

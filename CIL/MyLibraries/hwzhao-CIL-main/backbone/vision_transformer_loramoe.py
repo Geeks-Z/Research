@@ -46,28 +46,6 @@ class Adapter(nn.Module):
 
         self.n_embd = config.d_model if d_model is None else d_model
         self.down_size = config.attn_bn if bottleneck is None else bottleneck
-
-        # self.down_proj = nn.Linear(config.d_model, self.down_size)
-        # self.up_proj = nn.Linear(self.down_size, config.d_model)
-        # self.expert_lora = nn.ModuleDict(
-        #     {
-        #         'down_proj': nn.Linear(config.d_model, self.down_size),
-        #         'up_proj': nn.Linear(self.down_size, config.d_model)
-        #     }
-        # )
-        # if init_option == "bert":
-        #     raise NotImplementedError
-        # elif init_option == "lora":
-        #     with torch.no_grad():
-        #         nn.init.kaiming_uniform_(self.expert_lora.down_proj.weight, a=math.sqrt(5))
-        #         nn.init.zeros_(self.expert_lora.up_proj.weight)
-        #         nn.init.zeros_(self.expert_lora.down_proj.bias)
-        #         nn.init.zeros_(self.expert_lora.up_proj.bias)
-        #         nn.init.kaiming_uniform_(self.down_proj.weight, a=math.sqrt(5))
-        #         nn.init.zeros_(self.up_proj.weight)
-        #         nn.init.zeros_(self.down_proj.bias)
-        #         nn.init.zeros_(self.up_proj.bias)
-        # self.expert_loras = nn.ModuleList(self.expert_lora for i in range(config.expert_num))
         self.expert_loras = nn.ModuleList(nn.ModuleDict(
             {
                 'down_proj': nn.Linear(config.d_model, self.down_size),
