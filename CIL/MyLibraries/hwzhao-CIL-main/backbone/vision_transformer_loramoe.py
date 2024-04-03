@@ -441,6 +441,11 @@ def vit_base_patch16_224_in21k_moe(pretrained=False, **kwargs):
     for name, p in model.named_parameters():
         if name in msg.missing_keys:
             p.requires_grad = True
+            if 'down' in name and 'weight' in name:
+                nn.init.kaiming_uniform_(p, a=math.sqrt(5))
+            else:
+                nn.init.zeros_(p)
+            # print(name)
         else:
             p.requires_grad = False
     return model
