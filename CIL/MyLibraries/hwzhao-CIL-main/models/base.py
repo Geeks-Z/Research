@@ -124,6 +124,17 @@ class BaseLearner(object):
 
         return cnn_accy, nme_accy
 
+    def eval_task_lora_expert(self):
+        y_pred, y_true = self._eval_cnn_lora_expert(self.test_loader)
+        cnn_accy = self._evaluate(y_pred, y_true)
+
+        if hasattr(self, "_class_means"):
+            y_pred, y_true = self._eval_nme(self.test_loader, self._class_means)
+            nme_accy = self._evaluate(y_pred, y_true)
+        else:
+            nme_accy = None
+
+        return cnn_accy, nme_accy
     def incremental_train(self):
         pass
 
@@ -166,6 +177,28 @@ class BaseLearner(object):
 
         return np.concatenate(y_pred), np.concatenate(y_true)  # [N, topk]
 
+    def _eval_cnn_lora_expert(self,loader):
+        self._network.eval()
+        y_pred, y_true = [], []
+        for _, (_, inputs, targets) in enumerate(loader):
+            inputs = inputs.to(self._device)
+            self._network.backbone.cur_task = torch.topk(targets, k=1, dim=0, largest=False, sorted=False)[0].item()//40
+            with torch.no_grad():
+                outputs = self._network(inputs)["logits"]
+            predicts = torch.topk(
+                outputs, k=1, dim=1, largest=True, sorted=True
+            )[
+                1
+            ]
+            predicts = torch.topk(
+                outputs, k=self.topk, dim=1, largest=True, sorted=True
+            )[
+                1
+            ]  # [bs, topk]
+            y_pred.append(predicts.cpu().numpy())
+            y_true.append(targets.cpu().numpy())
+
+        return np.concatenate(y_pred), np.concatenate(y_true)  # [N, topk]
     def _eval_nme(self, loader, class_means):
         self._network.eval()
         vectors, y_true = self._extract_vectors(loader)

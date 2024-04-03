@@ -35,7 +35,8 @@ class Adapter(nn.Module):
                  dropout=0.0,
                  init_option="bert",
                  adapter_scalar="1.0",
-                 adapter_layernorm_option="in"
+                 adapter_layernorm_option="in",
+                 cur_task=None
                  ):
         super().__init__()
         # 路由
@@ -44,26 +45,19 @@ class Adapter(nn.Module):
         self.n_embd = config.d_model if d_model is None else d_model
         self.down_size = config.attn_bn if bottleneck is None else bottleneck
 
-        self.expert_lora = nn.ModuleDict(
+        self.expert_loras = nn.ModuleList(nn.ModuleDict(
             {
                 'down_proj': nn.Linear(config.d_model, self.down_size),
                 'up_proj': nn.Linear(self.down_size, config.d_model)
             }
-        )
+        ) for i in range(config.expert_num))
+        self.cur_task = cur_task
 
-        # self.dropout = dropout
-        # if init_option == "bert":
-        #     raise NotImplementedError
-        # elif init_option == "lora":
-        #     with torch.no_grad():
-        #         nn.init.zeros_(self.down_proj.bias)
-        #         nn.init.zeros_(self.up_proj.bias)
-
-    def forward(self, x, add_residual=True, residual=None):
+    def forward(self, x, add_residual=True, residual=None, cur_task=None):
         residual = x if residual is None else residual
         # route_weight = nn.functional.softmax(self.lora_route(x[:, 0, :]), dtype=torch.float32)
-        down = self.expert_lora.down_proj(x)
-        up = self.expert_lora.up_proj(down)
+        down = self.expert_loras[cur_task].down_proj(x)
+        up = self.expert_loras[cur_task].up_proj(down)
         if add_residual:
             output = up + residual
         else:
@@ -119,33 +113,42 @@ class Attention(nn.Module):
 class Block(nn.Module):
 
     def __init__(self, dim, num_heads, mlp_ratio=4., qkv_bias=False, drop=0., attn_drop=0.,
-                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, config=None, layer_id=None):
+                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, config=None,layer_id=None,cur_task=None):
         super().__init__()
         self.config = config
+        self.cur_task = cur_task
         self.norm1 = norm_layer(dim)
         self.attn = Attention(dim, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop)
         # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
         self.norm2 = norm_layer(dim)
-        # mlp_hidden_dim = int(dim * mlp_ratio)
-        #
-        # self.fc1 = nn.Linear(dim, mlp_hidden_dim)
-        # self.fc2 = nn.Linear(mlp_hidden_dim, dim)
-        # self.act = act_layer()
-        # self.mlp_drop = nn.Dropout(drop)
+        mlp_hidden_dim = int(dim * mlp_ratio)
 
+        self.fc1 = nn.Linear(dim, mlp_hidden_dim)
+        self.fc2 = nn.Linear(mlp_hidden_dim, dim)
+        self.act = act_layer()
+        self.mlp_drop = nn.Dropout(drop)
         if config.ffn_adapt:
             self.adaptmlp = Adapter(self.config, dropout=0.1, bottleneck=config.ffn_num,
                                     init_option=config.ffn_adapter_init_option,
                                     adapter_scalar=config.ffn_adapter_scalar,
                                     adapter_layernorm_option=config.ffn_adapter_layernorm_option,
+                                    cur_task=self.cur_task
                                     )
 
-    def forward(self, x):
+    def forward(self, x,cur_task):
+        # 残差 + attention层输出
         x = x + self.drop_path(self.attn(self.norm1(x)))
-        if self.config.ffn_adapt and self.config.ffn_option == 'parallel':
-            adapt_x = self.adaptmlp(x, add_residual=False)
-            return x + adapt_x
+        residual = x
+        # mlp层输出
+        mlp_out = self.mlp_drop(self.act(self.fc1(self.norm2(x))))
+        mlp_out = self.drop_path(self.mlp_drop(self.fc2(mlp_out)))
+        # lora-expert层输出
+        if self.config.ffn_adapt:
+            lora_expert = self.adaptmlp(self.norm2(x), add_residual=False,cur_task=cur_task)
+            return mlp_out + residual + lora_expert
+        x = residual + mlp_out
+        return x
 
         # residual = x
 
@@ -173,10 +176,11 @@ class VisionTransformer(nn.Module):
                  depth=12,
                  num_heads=12, mlp_ratio=4., qkv_bias=True, representation_size=None, distilled=False,
                  drop_rate=0., attn_drop_rate=0., drop_path_rate=0., embed_layer=PatchEmbed, norm_layer=None,
-                 act_layer=None, weight_init='', tuning_config=None):
+                 act_layer=None, weight_init='', tuning_config=None,cur_task=0):
         super().__init__()
 
         print("I'm using ViT with adapters.")
+        self.cur_task = cur_task
         self.tuning_config = tuning_config
         self.num_classes = num_classes
         self.num_features = self.embed_dim = embed_dim  # num_features for consistency with other models
@@ -198,7 +202,7 @@ class VisionTransformer(nn.Module):
             Block(
                 dim=embed_dim, num_heads=num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, drop=drop_rate,
                 attn_drop=attn_drop_rate, drop_path=dpr[i], norm_layer=norm_layer, act_layer=act_layer,
-                config=tuning_config, layer_id=i,
+                config=tuning_config, layer_id=i, cur_task=self.cur_task
             )
             for i in range(depth)])
         self.norm = norm_layer(embed_dim)
@@ -257,7 +261,7 @@ class VisionTransformer(nn.Module):
         if self.num_tokens == 2:
             self.head_dist = nn.Linear(self.embed_dim, self.num_classes) if num_classes > 0 else nn.Identity()
 
-    def forward_features(self, x):
+    def forward_features(self, x,cur_task):
         B = x.shape[0]
         x = self.patch_embed(x)
 
@@ -270,7 +274,7 @@ class VisionTransformer(nn.Module):
             if self.tuning_config.vpt_on:
                 eee = self.embeddings[idx].expand(B, -1, -1)
                 x = torch.cat([eee, x], dim=1)
-            x = blk(x)
+            x = blk(x,cur_task)
             if self.tuning_config.vpt_on:
                 x = x[:, self.tuning_config.vpt_num:, :]
 
@@ -284,7 +288,7 @@ class VisionTransformer(nn.Module):
         return outcome
 
     def forward(self, x):
-        x = self.forward_features(x, )
+        x = self.forward_features(x, self.cur_task)
         if self.head_dist is not None:
             x, x_dist = self.head(x[0]), self.head_dist(x[1])  # x must be a tuple
             if self.training and not torch.jit.is_scripting():
@@ -385,8 +389,14 @@ def vit_base_patch16_224_inc(pretrained=False, **kwargs):
     for name, p in model.named_parameters():
         if name in msg.missing_keys:
             p.requires_grad = True
+            if 'down' in name and 'weight' in name:
+                nn.init.kaiming_uniform_(p, a=math.sqrt(5))
+            else:
+                nn.init.zeros_(p)
+            # print(name)
         else:
             p.requires_grad = False
+
     return model
 
 
@@ -440,6 +450,11 @@ def vit_base_patch16_224_in21k_inc(pretrained=False, **kwargs):
     for name, p in model.named_parameters():
         if name in msg.missing_keys:
             p.requires_grad = True
+            if 'down' in name and 'weight' in name:
+                nn.init.kaiming_uniform_(p, a=math.sqrt(5))
+            else:
+                nn.init.zeros_(p)
+            # print(name)
         else:
             p.requires_grad = False
     return model

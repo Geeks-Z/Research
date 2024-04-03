@@ -24,6 +24,10 @@ class Learner(BaseLearner):
 
     def after_task(self):
         self._known_classes = self._total_classes
+        # 固定上一阶段的lora_expert参数更新
+        self.frozen_lora_expert()
+        self._network.backbone.cur_task = self._cur_task + 1;
+
     def replace_fc(self, trainloader, model, args):
         model = model.eval()
         embedding_list = []
@@ -40,9 +44,7 @@ class Learner(BaseLearner):
         label_list = torch.cat(label_list, dim=0)
 
         class_list = np.unique(self.train_dataset.labels)
-        proto_list = []
         for class_index in class_list:
-            # print('Replacing...',class_index)
             data_index = (label_list == class_index).nonzero().squeeze(-1)
             embedding = embedding_list[data_index]
             proto = embedding.mean(0)
@@ -78,35 +80,53 @@ class Learner(BaseLearner):
 
     def _train(self, train_loader, test_loader, train_loader_for_protonet):
         self._network.to(self._device)
-        if self._cur_task == 0:
-            # show total parameters and trainable parameters
-            total_params = sum(p.numel() for p in self._network.parameters())
-            print(f'{total_params:,} total parameters.')
-            total_trainable_params = sum(
-                p.numel() for p in self._network.parameters() if p.requires_grad)
-            print(f'{total_trainable_params:,} training parameters.')
-            if total_params != total_trainable_params:
-                for name, param in self._network.named_parameters():
-                    if param.requires_grad:
-                        print(name, param.numel())
-            if self.args['optimizer'] == 'sgd':
-                optimizer = optim.SGD(self._network.parameters(), momentum=0.9, lr=self.init_lr,
-                                      weight_decay=self.weight_decay)
-            elif self.args['optimizer'] == 'adam':
-                optimizer = optim.AdamW(self._network.parameters(), lr=self.init_lr, weight_decay=self.weight_decay)
-            scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.args['tuned_epoch'],
-                                                             eta_min=self.min_lr)
-            self._init_train(train_loader, test_loader, optimizer, scheduler)
-            self.construct_dual_branch_network()
-        else:
-            pass
+        # if self._cur_task == 0:
+        #     # show total parameters and trainable parameters
+        #     total_params = sum(p.numel() for p in self._network.parameters())
+        #     print(f'{total_params:,} total parameters.')
+        #     total_trainable_params = sum(
+        #         p.numel() for p in self._network.parameters() if p.requires_grad)
+        #     print(f'{total_trainable_params:,} training parameters.')
+        #     if total_params != total_trainable_params:
+        #         for name, param in self._network.named_parameters():
+        #             if param.requires_grad:
+        #                 print(name, param.numel())
+        #     if self.args['optimizer'] == 'sgd':
+        #         optimizer = optim.SGD(self._network.parameters(), momentum=0.9, lr=self.init_lr,
+        #                               weight_decay=self.weight_decay)
+        #     elif self.args['optimizer'] == 'adam':
+        #         optimizer = optim.AdamW(self._network.parameters(), lr=self.init_lr, weight_decay=self.weight_decay)
+        #     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.args['tuned_epoch'],
+        #                                                      eta_min=self.min_lr)
+        #     self._init_train(train_loader, test_loader, optimizer, scheduler)
+        #     self.construct_dual_branch_network()
+        # else:
+        #     pass
+        # show total parameters and trainable parameters
+        # total_params = sum(p.numel() for p in self._network.parameters())
+        # print(f'{total_params:,} total parameters.')
+        # total_trainable_params = sum(
+        #     p.numel() for p in self._network.parameters() if p.requires_grad)
+        # print(f'{total_trainable_params:,} training parameters.')
+        # if total_params != total_trainable_params:
+        #     for name, param in self._network.named_parameters():
+        #         if param.requires_grad:
+        #             print(name, param.numel())
+        if self.args['optimizer'] == 'sgd':
+            optimizer = optim.SGD(self._network.parameters(), momentum=0.9, lr=self.init_lr,
+                                  weight_decay=self.weight_decay)
+        elif self.args['optimizer'] == 'adam':
+            optimizer = optim.AdamW(self._network.parameters(), lr=self.init_lr, weight_decay=self.weight_decay)
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.args['tuned_epoch'],
+                                                         eta_min=self.min_lr)
+        self._init_train(train_loader, test_loader, optimizer, scheduler,self._cur_task)
         self.replace_fc(train_loader_for_protonet, self._network, None)
 
     def construct_dual_branch_network(self):
         network = MultiBranchCosineIncrementalNet(self.args, True)
         network.construct_dual_branch_network(self._network)
         self._network=network.to(self._device)
-    def _init_train(self, train_loader, test_loader, optimizer, scheduler):
+    def _init_train(self, train_loader, test_loader, optimizer, scheduler,cur_task):
         prog_bar = tqdm(range(self.args['tuned_epoch']))
         for _, epoch in enumerate(prog_bar):
             self._network.train()
@@ -151,5 +171,11 @@ class Learner(BaseLearner):
 
         logging.info(info)
 
+    def frozen_lora_expert(self):
+        frozen_lora_down = str(self._network.backbone.cur_task)+'.down'
+        frozen_lora_up = str(self._network.backbone.cur_task)+'.up'
+        for name, p in self._network.named_parameters():
+            if frozen_lora_down in name or frozen_lora_up in name:
+                p.requires_grad = False
 
 
