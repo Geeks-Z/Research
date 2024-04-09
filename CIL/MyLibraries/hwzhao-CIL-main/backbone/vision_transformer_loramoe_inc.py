@@ -46,26 +46,32 @@ class Adapter(nn.Module):
             }
         ) for i in range(config.expert_num))
         self.cur_task = cur_task
+        self.gate_loss = 0
 
-    def forward(self, x, add_residual=True, residual=None, cur_task=None,idx=None):
+    def forward(self, x, add_residual=True, residual=None, cur_task=None, idx=None):
         residual = x if residual is None else residual
         # 测试阶段确定lora_expert
         if not self.training:
-            cur_task = torch.mode(torch.max(nn.functional.softmax(self.lora_route(x[:, 0, :]),dim=1), dim=1).indices).values.item() // 20
+            cur_task = torch.mode(
+                torch.max(nn.functional.softmax(self.lora_route(x[:, 0, :]), dim=1), dim=1).indices).values.item() // 20
         # batch_gate = torch.mode(torch.max(nn.functional.softmax(self.lora_route(x), dim=2), dim=2).indices).values // 20
         # expert_gate = torch.mode(torch.mode(batch_gate, dim=1))
-        if idx == 0 and self.training:
-            batch_gate = nn.functional.softmax(self.lora_route(x[:, 0, :]),dim=1).to('cpu')
-            gate_loss = nn.functional.cross_entropy(batch_gate, torch.tensor(cur_task).expand(x.size(0)).to('cpu'))
-            self.gate_loss = gate_loss
+        # 只在Block 0 设置路由
+        # if idx == 0 and self.training:
+        #     batch_gate = nn.functional.softmax(self.lora_route(x[:, 0, :]),dim=1).to('cpu')
+        #     gate_loss = nn.functional.cross_entropy(batch_gate, torch.tensor(cur_task).expand(x.size(0)).to('cpu'))
+        #     self.gate_loss = gate_loss
+        batch_gate = nn.functional.softmax(self.lora_route(x[:, 0, :]), dim=1).to('cpu')
+        self.gate_loss = nn.functional.cross_entropy(batch_gate, torch.tensor(cur_task).expand(x.size(0)).to('cpu')).item()
         down = self.expert_loras[cur_task].down_proj(x)
         up = self.expert_loras[cur_task].up_proj(down)
-        if add_residual:
-            output = up + residual
-        else:
-            output = up
-
-        return output
+        return up, self.gate_loss
+        # if add_residual:
+        #     output = up + residual
+        # else:
+        #     output = up
+        #
+        # return output
 
 
 class Attention(nn.Module):
@@ -115,10 +121,12 @@ class Attention(nn.Module):
 class Block(nn.Module):
 
     def __init__(self, dim, num_heads, mlp_ratio=4., qkv_bias=False, drop=0., attn_drop=0.,
-                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, config=None, layer_id=None, cur_task=None,idx=None):
+                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, config=None, layer_id=None, cur_task=None,
+                 idx=None):
         super().__init__()
         self.config = config
         self.cur_task = cur_task
+        self.gate_loss = 0
         # self.idx = idx
         self.norm1 = norm_layer(dim)
         self.attn = Attention(dim, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop)
@@ -140,7 +148,7 @@ class Block(nn.Module):
                                     idx=idx
                                     )
 
-    def forward(self, x, cur_task,idx):
+    def forward(self, x, cur_task, idx):
         # 残差 + attention层输出
         x = x + self.drop_path(self.attn(self.norm1(x)))
         residual = x
@@ -148,8 +156,8 @@ class Block(nn.Module):
         mlp_out = self.mlp_drop(self.act(self.fc1(self.norm2(x))))
         mlp_out = self.drop_path(self.mlp_drop(self.fc2(mlp_out)))
         # lora-expert层输出
-        lora_expert= self.adaptmlp(self.norm2(x), add_residual=False, cur_task=cur_task,idx=idx)
-        return mlp_out + residual + lora_expert
+        lora_expert, self.gate_loss = self.adaptmlp(self.norm2(x), add_residual=False, cur_task=cur_task, idx=idx)
+        return mlp_out + residual + lora_expert, self.gate_loss
 
 
 class VisionTransformer(nn.Module):
@@ -165,7 +173,7 @@ class VisionTransformer(nn.Module):
 
         print("I'm using ViT with adapters.")
         self.cur_task = cur_task
-        # self.gate_loss = 0
+        self.gate_loss = 0
         self.tuning_config = tuning_config
         self.num_classes = num_classes
         self.num_features = self.embed_dim = embed_dim  # num_features for consistency with other models
@@ -187,7 +195,7 @@ class VisionTransformer(nn.Module):
             Block(
                 dim=embed_dim, num_heads=num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, drop=drop_rate,
                 attn_drop=attn_drop_rate, drop_path=dpr[i], norm_layer=norm_layer, act_layer=act_layer,
-                config=tuning_config, layer_id=i, cur_task=self.cur_task,idx=i
+                config=tuning_config, layer_id=i, cur_task=self.cur_task, idx=i
             )
             for i in range(depth)])
         self.norm = norm_layer(embed_dim)
@@ -259,8 +267,8 @@ class VisionTransformer(nn.Module):
             if self.tuning_config.vpt_on:
                 eee = self.embeddings[idx].expand(B, -1, -1)
                 x = torch.cat([eee, x], dim=1)
-            x = blk(x, cur_task, idx)
-            # self.gate_loss = self.gate_loss + gate_loss
+            x, gate_loss = blk(x, cur_task, idx)
+            self.gate_loss = self.gate_loss + gate_loss
             if self.tuning_config.vpt_on:
                 x = x[:, self.tuning_config.vpt_num:, :]
 
@@ -271,10 +279,10 @@ class VisionTransformer(nn.Module):
             x = self.norm(x)
             outcome = x[:, 0]
 
-        return outcome#, self.gate_loss
+        return outcome, self.gate_loss
 
     def forward(self, x):
-        x = self.forward_features(x, self.cur_task)
+        x, gate_loss = self.forward_features(x, self.cur_task)
         if self.head_dist is not None:
             x, x_dist = self.head(x[0]), self.head_dist(x[1])  # x must be a tuple
             if self.training and not torch.jit.is_scripting():
@@ -284,7 +292,7 @@ class VisionTransformer(nn.Module):
                 return (x + x_dist) / 2
         else:
             x = self.head(x)
-        return x
+        return x, gate_loss
 
 
 # def vit_base_patch16(**kwargs):

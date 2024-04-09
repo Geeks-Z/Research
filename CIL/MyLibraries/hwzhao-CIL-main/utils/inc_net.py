@@ -1087,7 +1087,7 @@ class LoRAMoEIncNet(BaseNet):
         return self.backbone(x)
 
     def forward(self, x):
-        x = self.backbone(x)
+        x,gate_loss = self.backbone(x)
         out = self.fc(x)
-        out.update({"features": x})
+        out.update({"features": x, "gate_loss": gate_loss})
         return out

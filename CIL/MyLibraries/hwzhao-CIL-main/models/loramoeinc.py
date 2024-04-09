@@ -98,9 +98,23 @@ class Learner(BaseLearner):
             correct, total = 0, 0
             for i, (_, inputs, targets) in enumerate(train_loader):
                 inputs, targets = inputs.to(self._device), targets.to(self._device)
-                logits = self._network(inputs)["logits"]
+                out = self._network(inputs)
+                logits = out["logits"]
+                gate_loss = out["gate_loss"]
                 # self._network.backbone.gate_loss
-                loss = F.cross_entropy(logits, targets) + self._network.backbone.blocks[0].adaptmlp.gate_loss
+                loss = F.cross_entropy(logits, targets)+(self._network.backbone.blocks[0].adaptmlp.gate_loss
+                        +self._network.backbone.blocks[1].adaptmlp.gate_loss
+                        +self._network.backbone.blocks[2].adaptmlp.gate_loss
+                        +self._network.backbone.blocks[3].adaptmlp.gate_loss
+                        +self._network.backbone.blocks[4].adaptmlp.gate_loss
+                        +self._network.backbone.blocks[5].adaptmlp.gate_loss
+                        +self._network.backbone.blocks[6].adaptmlp.gate_loss
+                        +self._network.backbone.blocks[7].adaptmlp.gate_loss
+                        +self._network.backbone.blocks[8].adaptmlp.gate_loss
+                        +self._network.backbone.blocks[9].adaptmlp.gate_loss
+                        +self._network.backbone.blocks[10].adaptmlp.gate_loss
+                        +self._network.backbone.blocks[11].adaptmlp.gate_loss)/12
+                # loss = gate_loss
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
