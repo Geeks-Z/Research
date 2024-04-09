@@ -16,7 +16,7 @@ class Learner(BaseLearner):
     def __init__(self, args):
         super().__init__(args)
         self._network = LoRAMoEIncNet(args, True)
-        self.batch_size = 128
+        self.batch_size = args["batch_size"] if args["batch_size"] is not None else 128
         self.init_lr = args["init_lr"] if args["init_lr"] is not None else 0.01
         self.weight_decay = args["weight_decay"] if args["weight_decay"] is not None else 0.0005
         self.min_lr = args['min_lr'] if args['min_lr'] is not None else 1e-8
@@ -80,38 +80,6 @@ class Learner(BaseLearner):
 
     def _train(self, train_loader, test_loader, train_loader_for_protonet):
         self._network.to(self._device)
-        # if self._cur_task == 0:
-        #     # show total parameters and trainable parameters
-        #     total_params = sum(p.numel() for p in self._network.parameters())
-        #     print(f'{total_params:,} total parameters.')
-        #     total_trainable_params = sum(
-        #         p.numel() for p in self._network.parameters() if p.requires_grad)
-        #     print(f'{total_trainable_params:,} training parameters.')
-        #     if total_params != total_trainable_params:
-        #         for name, param in self._network.named_parameters():
-        #             if param.requires_grad:
-        #                 print(name, param.numel())
-        #     if self.args['optimizer'] == 'sgd':
-        #         optimizer = optim.SGD(self._network.parameters(), momentum=0.9, lr=self.init_lr,
-        #                               weight_decay=self.weight_decay)
-        #     elif self.args['optimizer'] == 'adam':
-        #         optimizer = optim.AdamW(self._network.parameters(), lr=self.init_lr, weight_decay=self.weight_decay)
-        #     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.args['tuned_epoch'],
-        #                                                      eta_min=self.min_lr)
-        #     self._init_train(train_loader, test_loader, optimizer, scheduler)
-        #     self.construct_dual_branch_network()
-        # else:
-        #     pass
-        # show total parameters and trainable parameters
-        # total_params = sum(p.numel() for p in self._network.parameters())
-        # print(f'{total_params:,} total parameters.')
-        # total_trainable_params = sum(
-        #     p.numel() for p in self._network.parameters() if p.requires_grad)
-        # print(f'{total_trainable_params:,} training parameters.')
-        # if total_params != total_trainable_params:
-        #     for name, param in self._network.named_parameters():
-        #         if param.requires_grad:
-        #             print(name, param.numel())
         if self.args['optimizer'] == 'sgd':
             optimizer = optim.SGD(self._network.parameters(), momentum=0.9, lr=self.init_lr,
                                   weight_decay=self.weight_decay)
@@ -122,10 +90,6 @@ class Learner(BaseLearner):
         self._init_train(train_loader, test_loader, optimizer, scheduler,self._cur_task)
         self.replace_fc(train_loader_for_protonet, self._network, None)
 
-    def construct_dual_branch_network(self):
-        network = MultiBranchCosineIncrementalNet(self.args, True)
-        network.construct_dual_branch_network(self._network)
-        self._network=network.to(self._device)
     def _init_train(self, train_loader, test_loader, optimizer, scheduler,cur_task):
         prog_bar = tqdm(range(self.args['tuned_epoch']))
         for _, epoch in enumerate(prog_bar):
@@ -135,8 +99,8 @@ class Learner(BaseLearner):
             for i, (_, inputs, targets) in enumerate(train_loader):
                 inputs, targets = inputs.to(self._device), targets.to(self._device)
                 logits = self._network(inputs)["logits"]
-
-                loss = F.cross_entropy(logits, targets)
+                # self._network.backbone.gate_loss
+                loss = F.cross_entropy(logits, targets) + self._network.backbone.blocks[0].adaptmlp.gate_loss
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -149,24 +113,13 @@ class Learner(BaseLearner):
             scheduler.step()
             train_acc = np.around(tensor2numpy(correct) * 100 / total, decimals=2)
 
-            if epoch % 5 == 0:
-                info = "Task {}, Epoch {}/{} => Loss {:.3f}, Train_accy {:.2f}".format(
-                    self._cur_task,
-                    epoch + 1,
-                    self.args['tuned_epoch'],
-                    losses / len(train_loader),
-                    train_acc,
-                )
-            else:
-                test_acc = self._compute_accuracy(self._network, test_loader)
-                info = "Task {}, Epoch {}/{} => Loss {:.3f}, Train_accy {:.2f}, Test_accy {:.2f}".format(
-                    self._cur_task,
-                    epoch + 1,
-                    self.args['tuned_epoch'],
-                    losses / len(train_loader),
-                    train_acc,
-                    test_acc,
-                )
+            info = "Task {}, Epoch {}/{} => Loss {:.3f}, Train_accy {:.2f}".format(
+                self._cur_task,
+                epoch + 1,
+                self.args['tuned_epoch'],
+                losses / len(train_loader),
+                train_acc,
+            )
             prog_bar.set_description(info)
 
         logging.info(info)

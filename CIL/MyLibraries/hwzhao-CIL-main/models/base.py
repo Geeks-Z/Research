@@ -6,9 +6,11 @@ from torch import nn
 from torch.utils.data import DataLoader
 from utils.toolkit import tensor2numpy, accuracy
 from scipy.spatial.distance import cdist
+import timm
 
 EPSILON = 1e-8
 batch_size = 64
+
 
 class BaseLearner(object):
     def __init__(self, args):
@@ -48,7 +50,7 @@ class BaseLearner(object):
             return self._network.module.feature_dim
         else:
             return self._network.feature_dim
-    
+
     def build_rehearsal_memory(self, data_manager, per_class):
         if self._fixed_memory:
             self._construct_exemplar_unified(data_manager, per_class)
@@ -56,38 +58,38 @@ class BaseLearner(object):
             self._reduce_exemplar(data_manager, per_class)
             self._construct_exemplar(data_manager, per_class)
 
-    def tsne(self,showcenters=False,Normalize=False):
+    def tsne(self, showcenters=False, Normalize=False):
         import umap
         import matplotlib.pyplot as plt
         print('now draw tsne results of extracted features.')
-        tot_classes=self._total_classes
+        tot_classes = self._total_classes
         test_dataset = self.data_manager.get_dataset(np.arange(0, tot_classes), source='test', mode='test')
         valloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
         vectors, y_true = self._extract_vectors(valloader)
         if showcenters:
-            fc_weight=self._network.fc.proj.cpu().detach().numpy()[:tot_classes]
+            fc_weight = self._network.fc.proj.cpu().detach().numpy()[:tot_classes]
             print(fc_weight.shape)
-            vectors=np.vstack([vectors,fc_weight])
-        
+            vectors = np.vstack([vectors, fc_weight])
+
         if Normalize:
             vectors = vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
 
         embedding = umap.UMAP(n_neighbors=5,
-                      min_dist=0.3,
-                      metric='correlation').fit_transform(vectors)
-        
+                              min_dist=0.3,
+                              metric='correlation').fit_transform(vectors)
+
         if showcenters:
-            clssscenters=embedding[-tot_classes:,:]
-            centerlabels=np.arange(tot_classes)
-            embedding=embedding[:-tot_classes,:]
-        scatter=plt.scatter(embedding[:,0],embedding[:,1],c=y_true,s=20,cmap=plt.cm.get_cmap("tab20"))
+            clssscenters = embedding[-tot_classes:, :]
+            centerlabels = np.arange(tot_classes)
+            embedding = embedding[:-tot_classes, :]
+        scatter = plt.scatter(embedding[:, 0], embedding[:, 1], c=y_true, s=20, cmap=plt.cm.get_cmap("tab20"))
         plt.legend(*scatter.legend_elements())
         if showcenters:
-            plt.scatter(clssscenters[:,0],clssscenters[:,1],marker='*',s=50,c=centerlabels,cmap=plt.cm.get_cmap("tab20"),edgecolors='black')
-        
-        plt.savefig(str(self.args['model_name'])+str(tot_classes)+'tsne.pdf')
-        plt.close()
+            plt.scatter(clssscenters[:, 0], clssscenters[:, 1], marker='*', s=50, c=centerlabels,
+                        cmap=plt.cm.get_cmap("tab20"), edgecolors='black')
 
+        plt.savefig(str(self.args['model_name']) + str(tot_classes) + 'tsne.pdf')
+        plt.close()
 
     def save_checkpoint(self, filename):
         self._network.cpu()
@@ -135,12 +137,13 @@ class BaseLearner(object):
             nme_accy = None
 
         return cnn_accy, nme_accy
+
     def incremental_train(self):
         pass
 
     def _train(self):
         pass
-    
+
     def _get_memory(self):
         if len(self._data_memory) == 0:
             return None
@@ -177,12 +180,14 @@ class BaseLearner(object):
 
         return np.concatenate(y_pred), np.concatenate(y_true)  # [N, topk]
 
-    def _eval_cnn_lora_expert(self,loader):
+    def _eval_cnn_lora_expert(self, loader):
         self._network.eval()
+        # self.model = timm.create_model("vit_base_patch16_224", pretrained=True, num_classes=0)
         y_pred, y_true = [], []
         for _, (_, inputs, targets) in enumerate(loader):
             inputs = inputs.to(self._device)
-            self._network.backbone.cur_task = torch.topk(targets, k=1, dim=0, largest=False, sorted=False)[0].item()//40
+            # TODO 确定lora_expert
+            # self._network.backbone.cur_task = self.change_lora_expert(inputs)
             with torch.no_grad():
                 outputs = self._network(inputs)["logits"]
             predicts = torch.topk(
@@ -199,6 +204,19 @@ class BaseLearner(object):
             y_true.append(targets.cpu().numpy())
 
         return np.concatenate(y_pred), np.concatenate(y_true)  # [N, topk]
+
+    def change_lora_expert(self, inputs):
+        self.model.to(self._device)
+        batch_embedding = self.model(inputs)
+        # 计算余弦相似性
+        batch_embedding_norm = batch_embedding / torch.norm(batch_embedding, dim=1, keepdim=True)
+        # similarity = torch.nn.functional.cosine_similarity(batch_embedding, self._network.fc.weight.data.t(), dim=1)
+        fc_norm = self._network.fc.weight.data / torch.norm(self._network.fc.weight.data,dim=1, keepdim=True)
+        similarity = torch.mm(batch_embedding_norm, fc_norm.T)
+        lora_expert = torch.mode(torch.max(nn.functional.softmax(similarity), dim=1).indices).values.item() // 20
+        return lora_expert
+        # torch.topk(targets, k=1, dim=0, largest=False, sorted=False)[0].item() // 40
+
     def _eval_nme(self, loader, class_means):
         self._network.eval()
         vectors, y_true = self._extract_vectors(loader)
@@ -229,7 +247,7 @@ class BaseLearner(object):
                 targets.append(_targets)
 
         return np.concatenate(vectors), np.concatenate(targets)
-    
+
     def _reduce_exemplar(self, data_manager, m):
         logging.info("Reducing exemplars...({} per classes)".format(m))
         dummy_data, dummy_targets = copy.deepcopy(self._data_memory), copy.deepcopy(

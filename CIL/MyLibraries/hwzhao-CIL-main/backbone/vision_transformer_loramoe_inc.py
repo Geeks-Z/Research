@@ -4,9 +4,8 @@
 # --------------------------------------------------------
 
 import math
-import torch
-import torch.nn as nn
 from timm.models.layers import DropPath
+from torch.nn import functional as F
 # --------------------------------------------------------
 # References:
 # timm: https://github.com/rwightman/pytorch-image-models/tree/master/timm
@@ -15,14 +14,9 @@ from timm.models.layers import DropPath
 # --------------------------------------------------------
 import timm
 from functools import partial
-from collections import OrderedDict
-import torch
 import torch.nn as nn
 from timm.models.vision_transformer import PatchEmbed
-from timm.models.registry import register_model
 
-import logging
-import os
 from collections import OrderedDict
 import torch
 
@@ -36,12 +30,12 @@ class Adapter(nn.Module):
                  init_option="bert",
                  adapter_scalar="1.0",
                  adapter_layernorm_option="in",
-                 cur_task=None
+                 cur_task=None,
+                 idx=None
                  ):
         super().__init__()
         # 路由
-        # self.lora_route = nn.Linear(config.d_model, 1, bias=False)
-        # nn.init.kaiming_uniform_(self.lora_route.weight, a=math.sqrt(5))
+        self.lora_route = nn.Linear(config.d_model, config.expert_num)
         self.n_embd = config.d_model if d_model is None else d_model
         self.down_size = config.attn_bn if bottleneck is None else bottleneck
 
@@ -53,9 +47,17 @@ class Adapter(nn.Module):
         ) for i in range(config.expert_num))
         self.cur_task = cur_task
 
-    def forward(self, x, add_residual=True, residual=None, cur_task=None):
+    def forward(self, x, add_residual=True, residual=None, cur_task=None,idx=None):
         residual = x if residual is None else residual
-        # route_weight = nn.functional.softmax(self.lora_route(x[:, 0, :]), dtype=torch.float32)
+        # 测试阶段确定lora_expert
+        if not self.training:
+            cur_task = torch.mode(torch.max(nn.functional.softmax(self.lora_route(x[:, 0, :]),dim=1), dim=1).indices).values.item() // 20
+        # batch_gate = torch.mode(torch.max(nn.functional.softmax(self.lora_route(x), dim=2), dim=2).indices).values // 20
+        # expert_gate = torch.mode(torch.mode(batch_gate, dim=1))
+        if idx == 0 and self.training:
+            batch_gate = nn.functional.softmax(self.lora_route(x[:, 0, :]),dim=1).to('cpu')
+            gate_loss = nn.functional.cross_entropy(batch_gate, torch.tensor(cur_task).expand(x.size(0)).to('cpu'))
+            self.gate_loss = gate_loss
         down = self.expert_loras[cur_task].down_proj(x)
         up = self.expert_loras[cur_task].up_proj(down)
         if add_residual:
@@ -113,10 +115,11 @@ class Attention(nn.Module):
 class Block(nn.Module):
 
     def __init__(self, dim, num_heads, mlp_ratio=4., qkv_bias=False, drop=0., attn_drop=0.,
-                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, config=None,layer_id=None,cur_task=None):
+                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, config=None, layer_id=None, cur_task=None,idx=None):
         super().__init__()
         self.config = config
         self.cur_task = cur_task
+        # self.idx = idx
         self.norm1 = norm_layer(dim)
         self.attn = Attention(dim, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop)
         # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here
@@ -133,10 +136,11 @@ class Block(nn.Module):
                                     init_option=config.ffn_adapter_init_option,
                                     adapter_scalar=config.ffn_adapter_scalar,
                                     adapter_layernorm_option=config.ffn_adapter_layernorm_option,
-                                    cur_task=self.cur_task
+                                    cur_task=self.cur_task,
+                                    idx=idx
                                     )
 
-    def forward(self, x,cur_task):
+    def forward(self, x, cur_task,idx):
         # 残差 + attention层输出
         x = x + self.drop_path(self.attn(self.norm1(x)))
         residual = x
@@ -144,28 +148,8 @@ class Block(nn.Module):
         mlp_out = self.mlp_drop(self.act(self.fc1(self.norm2(x))))
         mlp_out = self.drop_path(self.mlp_drop(self.fc2(mlp_out)))
         # lora-expert层输出
-        if self.config.ffn_adapt:
-            lora_expert = self.adaptmlp(self.norm2(x), add_residual=False,cur_task=cur_task)
-            return mlp_out + residual + lora_expert
-        x = residual + mlp_out
-        return x
-
-        # residual = x
-
-        # x = self.mlp_drop(self.act(self.fc1(self.norm2(x))))
-        # x = self.drop_path(self.mlp_drop(self.fc2(x)))
-
-        # if self.config.ffn_adapt:
-        #     if self.config.ffn_option == 'sequential':
-        #         x = self.adaptmlp(x)
-        #     elif self.config.ffn_option == 'parallel':
-        #         x = x + adapt_x
-        #     else:
-        #         raise ValueError(self.config.ffn_adapt)
-        #
-        # x = residual + x
-
-        return x
+        lora_expert= self.adaptmlp(self.norm2(x), add_residual=False, cur_task=cur_task,idx=idx)
+        return mlp_out + residual + lora_expert
 
 
 class VisionTransformer(nn.Module):
@@ -176,11 +160,12 @@ class VisionTransformer(nn.Module):
                  depth=12,
                  num_heads=12, mlp_ratio=4., qkv_bias=True, representation_size=None, distilled=False,
                  drop_rate=0., attn_drop_rate=0., drop_path_rate=0., embed_layer=PatchEmbed, norm_layer=None,
-                 act_layer=None, weight_init='', tuning_config=None,cur_task=0):
+                 act_layer=None, weight_init='', tuning_config=None, cur_task=0):
         super().__init__()
 
         print("I'm using ViT with adapters.")
         self.cur_task = cur_task
+        # self.gate_loss = 0
         self.tuning_config = tuning_config
         self.num_classes = num_classes
         self.num_features = self.embed_dim = embed_dim  # num_features for consistency with other models
@@ -202,7 +187,7 @@ class VisionTransformer(nn.Module):
             Block(
                 dim=embed_dim, num_heads=num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, drop=drop_rate,
                 attn_drop=attn_drop_rate, drop_path=dpr[i], norm_layer=norm_layer, act_layer=act_layer,
-                config=tuning_config, layer_id=i, cur_task=self.cur_task
+                config=tuning_config, layer_id=i, cur_task=self.cur_task,idx=i
             )
             for i in range(depth)])
         self.norm = norm_layer(embed_dim)
@@ -261,7 +246,7 @@ class VisionTransformer(nn.Module):
         if self.num_tokens == 2:
             self.head_dist = nn.Linear(self.embed_dim, self.num_classes) if num_classes > 0 else nn.Identity()
 
-    def forward_features(self, x,cur_task):
+    def forward_features(self, x, cur_task):
         B = x.shape[0]
         x = self.patch_embed(x)
 
@@ -274,7 +259,8 @@ class VisionTransformer(nn.Module):
             if self.tuning_config.vpt_on:
                 eee = self.embeddings[idx].expand(B, -1, -1)
                 x = torch.cat([eee, x], dim=1)
-            x = blk(x,cur_task)
+            x = blk(x, cur_task, idx)
+            # self.gate_loss = self.gate_loss + gate_loss
             if self.tuning_config.vpt_on:
                 x = x[:, self.tuning_config.vpt_num:, :]
 
@@ -285,7 +271,7 @@ class VisionTransformer(nn.Module):
             x = self.norm(x)
             outcome = x[:, 0]
 
-        return outcome
+        return outcome#, self.gate_loss
 
     def forward(self, x):
         x = self.forward_features(x, self.cur_task)
@@ -391,6 +377,8 @@ def vit_base_patch16_224_inc(pretrained=False, **kwargs):
             p.requires_grad = True
             if 'down' in name and 'weight' in name:
                 nn.init.kaiming_uniform_(p, a=math.sqrt(5))
+            elif 'lora_route' in name and 'weight' in name:
+                nn.init.kaiming_uniform_(p, a=math.sqrt(5))
             else:
                 nn.init.zeros_(p)
             # print(name)
@@ -458,4 +446,3 @@ def vit_base_patch16_224_in21k_inc(pretrained=False, **kwargs):
         else:
             p.requires_grad = False
     return model
-
