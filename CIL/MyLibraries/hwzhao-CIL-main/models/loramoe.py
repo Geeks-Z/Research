@@ -82,16 +82,23 @@ class Learner(BaseLearner):
 
     def _train(self, train_loader, test_loader, train_loader_for_protonet):
         self._network.to(self._device)
-        if self._cur_task == 0:
-            if self.args['optimizer'] == 'sgd':
-                optimizer = optim.SGD(self._network.parameters(), momentum=0.9, lr=self.init_lr,
-                                      weight_decay=self.weight_decay)
-            elif self.args['optimizer'] == 'adam':
-                optimizer = optim.AdamW(self._network.parameters(), lr=self.init_lr, weight_decay=self.weight_decay)
-            scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.args['tuned_epoch'], eta_min=self.min_lr)
-            self._init_train(train_loader, test_loader, optimizer, scheduler)
-        else:
-            pass
+        # if self._cur_task == 0:
+        #     if self.args['optimizer'] == 'sgd':
+        #         optimizer = optim.SGD(self._network.parameters(), momentum=0.9, lr=self.init_lr,
+        #                               weight_decay=self.weight_decay)
+        #     elif self.args['optimizer'] == 'adam':
+        #         optimizer = optim.AdamW(self._network.parameters(), lr=self.init_lr, weight_decay=self.weight_decay)
+        #     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.args['tuned_epoch'], eta_min=self.min_lr)
+        #     self._init_train(train_loader, test_loader, optimizer, scheduler)
+        # else:
+        #     pass
+        if self.args['optimizer'] == 'sgd':
+            optimizer = optim.SGD(self._network.parameters(), momentum=0.9, lr=self.init_lr,
+                                  weight_decay=self.weight_decay)
+        elif self.args['optimizer'] == 'adam':
+            optimizer = optim.AdamW(self._network.parameters(), lr=self.init_lr, weight_decay=self.weight_decay)
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.args['tuned_epoch'], eta_min=self.min_lr)
+        self._init_train(train_loader, test_loader, optimizer, scheduler)
         self.replace_fc(train_loader_for_protonet, self._network, None)
 
 
