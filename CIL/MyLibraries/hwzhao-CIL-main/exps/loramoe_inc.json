@@ -9,10 +9,10 @@
     "increment": 20,
     "model_name": "loramoeinc",
     "backbone_type": "pretrained_vit_b16_224_inc",
-    "device": ["1"],
+    "device": ["6"],
     "seed": [1993],
     
-    "tuned_epoch":1,
+    "tuned_epoch":5,
     "init_lr":0.01,
     "batch_size":64,
     "weight_decay":0.0005,

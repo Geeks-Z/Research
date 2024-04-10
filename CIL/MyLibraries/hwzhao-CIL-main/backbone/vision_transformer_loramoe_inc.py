@@ -35,7 +35,7 @@ class Adapter(nn.Module):
                  ):
         super().__init__()
         # 路由
-        self.lora_route = nn.Linear(config.d_model, config.expert_num)
+        self.lora_route = nn.Linear(config.d_model, config.expert_num,bias=False)
         self.n_embd = config.d_model if d_model is None else d_model
         self.down_size = config.attn_bn if bottleneck is None else bottleneck
 
@@ -52,8 +52,50 @@ class Adapter(nn.Module):
         residual = x if residual is None else residual
         # 测试阶段确定lora_expert
         if not self.training:
-            cur_task = torch.mode(
-                torch.max(nn.functional.softmax(self.lora_route(x[:, 0, :]), dim=1), dim=1).indices).values.item() // 20
+            gate_expert = torch.mode(torch.max(nn.functional.softmax(self.lora_route(x[:, 0, :]), dim=1), dim=1).indices).values.item()
+            # 100类 B0-Inc5
+            if gate_expert < 19:
+                cur_task = 0
+            elif 20 >= gate_expert < 39:
+                cur_task = 1
+            elif 40 >= gate_expert < 59:
+                cur_task = 2
+            elif 60 >= gate_expert < 79:
+                cur_task = 3
+            else:
+                cur_task = 4
+
+            # if gate_expert < 39:
+            #     cur_task = 0
+            # elif 40 >= gate_expert < 79:
+            #     cur_task = 1
+            # elif 80 >= gate_expert < 119:
+            #     cur_task = 2
+            # elif 120 >= gate_expert < 159:
+            #     cur_task = 3
+            # else:
+            #     cur_task = 4
+            # cub
+            # if gate_expert < 19:
+            #     cur_task = 0
+            # elif 20 >= gate_expert < 39:
+            #     cur_task = 1
+            # elif 40 >= gate_expert < 59:
+            #     cur_task = 2
+            # elif 60 >= gate_expert < 79:
+            #     cur_task = 3
+            # elif 80 >= gate_expert < 99:
+            #     cur_task = 4
+            # elif 100 >= gate_expert < 119:
+            #     cur_task = 5
+            # elif 120 >= gate_expert < 139:
+            #     cur_task = 6
+            # elif 140 >= gate_expert < 159:
+            #     cur_task = 7
+            # elif 160 >= gate_expert < 179:
+            #     cur_task = 8
+            # else:
+            #     cur_task = 9
         # batch_gate = torch.mode(torch.max(nn.functional.softmax(self.lora_route(x), dim=2), dim=2).indices).values // 20
         # expert_gate = torch.mode(torch.mode(batch_gate, dim=1))
         # 只在Block 0 设置路由
@@ -61,7 +103,8 @@ class Adapter(nn.Module):
         #     batch_gate = nn.functional.softmax(self.lora_route(x[:, 0, :]),dim=1).to('cpu')
         #     gate_loss = nn.functional.cross_entropy(batch_gate, torch.tensor(cur_task).expand(x.size(0)).to('cpu'))
         #     self.gate_loss = gate_loss
-        batch_gate = nn.functional.softmax(self.lora_route(x[:, 0, :]), dim=1).to('cpu')
+        #
+        batch_gate = nn.functional.softmax(self.lora_route(x[:, 0, :]+torch.normal(mean=0.,std=1/5.,size=(1,1)).item()), dim=1).to('cpu')
         self.gate_loss = nn.functional.cross_entropy(batch_gate, torch.tensor(cur_task).expand(x.size(0)).to('cpu')).item()
         down = self.expert_loras[cur_task].down_proj(x)
         up = self.expert_loras[cur_task].up_proj(down)
