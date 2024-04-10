@@ -4,6 +4,10 @@
 <p></p>
 <div align=center><img src="https://visitor-badge.laobi.icu/badge?page_id=Geeks-Z.Research&left_color=green&right_color=red" /> <img src="https://img.shields.io/github/last-commit/Geeks-Z/Research" /> <img src="https://img.shields.io/github/license/Geeks-Z/Research" /></div>
 
+## 仓库定位
+
+基于研究方向整理的代码仓库，包括但不限于：CIL（Class-Incremental Learning）类增量学习、PEFT（参数高效微调）等。
+
 ## 文件目录
 
 - `📁 CIL`：CIL（Class-Incremental Learning）类增量学习【Life-Long Machine Learning/Continual Learning】
@@ -16,6 +20,7 @@
   - `📁 MyLibraries`：基于第三方库修改后的个人代码
 ---
 - `📁 Model`：经典模型代码
+- `📁 PEFT`：参数高效微调代码
 
 ## 实验脚本
 
