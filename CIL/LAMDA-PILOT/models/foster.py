@@ -1,4 +1,6 @@
 import logging
+import time
+
 import numpy as np
 from tqdm import tqdm
 import torch
@@ -29,6 +31,8 @@ class Learner(BaseLearner):
         self.lambda_okd = args["lambda_okd"]
         self.wa_value = args["wa_value"]
         self.oofc = args["oofc"].lower()
+        self.train_time = 0
+        self.test_time = 0
 
     def after_task(self):
         self._known_classes = self._total_classes
@@ -84,7 +88,10 @@ class Learner(BaseLearner):
 
         if len(self._multiple_gpus) > 1:
             self._network = nn.DataParallel(self._network, self._multiple_gpus)
+        start_time = time.time()
         self._train(self.train_loader, self.test_loader)
+        total_time = time.time() - start_time
+        self.train_time += round(total_time, 2)
         self.build_rehearsal_memory(data_manager, self.samples_per_class)
         if len(self._multiple_gpus) > 1:
             self._network = self._network.module

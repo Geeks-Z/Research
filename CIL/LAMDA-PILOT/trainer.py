@@ -102,6 +102,8 @@ def _train(args):
 
             logging.info("Average Accuracy (CNN): {}".format(sum(cnn_curve["top1"])/len(cnn_curve["top1"])))
             logging.info("Average Accuracy (NME): {}".format(sum(nme_curve["top1"])/len(nme_curve["top1"])))
+            logging.info("Train Time: {}".format(model.train_time))
+            logging.info("Test Time: {} \n".format(model.test_time))
         else:
             logging.info("No NME accuracy.")
             logging.info("CNN: {}".format(cnn_accy["grouped"]))
@@ -118,7 +120,7 @@ def _train(args):
 
             print('Average Accuracy (CNN):', sum(cnn_curve["top1"])/len(cnn_curve["top1"]))
             logging.info("Average Accuracy (CNN): {} \n".format(sum(cnn_curve["top1"])/len(cnn_curve["top1"])))
-            logging.info("Train Time: {} \n".format(model.train_time))
+            logging.info("Train Time: {}".format(model.train_time))
             logging.info("Test Time: {} \n".format(model.test_time))
 
     if len(cnn_matrix) > 0:

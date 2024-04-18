@@ -19,6 +19,8 @@ class Learner(BaseLearner):
     def __init__(self, args):
         super().__init__(args)
         self._network = IncrementalNet(args, True)
+        self.train_time = 0
+        self.test_time = 0
 
     def after_task(self):
         self._known_classes = self._total_classes
@@ -50,7 +52,10 @@ class Learner(BaseLearner):
 
         if len(self._multiple_gpus) > 1:
             self._network = nn.DataParallel(self._network, self._multiple_gpus)
+        start_time = time.time()
         self._train(self.train_loader, self.test_loader)
+        total_time = time.time() - start_time
+        self.train_time += round(total_time, 2)
         if len(self._multiple_gpus) > 1:
             self._network = self._network.module
 

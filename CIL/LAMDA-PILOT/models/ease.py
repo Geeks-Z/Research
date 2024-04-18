@@ -37,6 +37,8 @@ class Learner(BaseLearner):
 
         self.moni_adam = args["moni_adam"]
         self.adapter_num = args["adapter_num"]
+        self.train_time = 0
+        self.test_time = 0
         
         if self.moni_adam:
             self.use_init_ptm = True
@@ -247,7 +249,10 @@ class Learner(BaseLearner):
         if len(self._multiple_gpus) > 1:
             print('Multiple GPUs')
             self._network = nn.DataParallel(self._network, self._multiple_gpus)
+        start_time = time.time()
         self._train(self.train_loader, self.test_loader)
+        total_time = time.time() - start_time
+        self.train_time += round(total_time, 2)
         if len(self._multiple_gpus) > 1:
             self._network = self._network.module
         self.replace_fc(self.train_loader_for_protonet)

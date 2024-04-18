@@ -28,8 +28,6 @@ class BaseLearner(object):
         self._device = args["device"][0]
         self._multiple_gpus = args["device"]
         self.args = args
-        self.train_time = 0
-        self.test_time = 0
 
     @property
     def exemplar_size(self):

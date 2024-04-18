@@ -26,6 +26,8 @@ class Learner(BaseLearner):
         self.weight_decay = args["weight_decay"] if args["weight_decay"] is not None else 0.0005
         self.min_lr = args["min_lr"] if args["min_lr"] is not None else 1e-8
         self.args = args
+        self.train_time = 0
+        self.test_time = 0
 
         # Freeze the parameters for ViT.
         if self.args["freeze"]:
@@ -67,7 +69,10 @@ class Learner(BaseLearner):
         if len(self._multiple_gpus) > 1:
             print('Multiple GPUs')
             self._network = nn.DataParallel(self._network, self._multiple_gpus)
+        start_time = time.time()
         self._train(self.train_loader, self.test_loader)
+        total_time = time.time() - start_time
+        self.train_time += round(total_time, 2)
         if len(self._multiple_gpus) > 1:
             self._network = self._network.module
 

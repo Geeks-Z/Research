@@ -5,11 +5,11 @@
     "memory_per_class": 20,
     "fixed_memory": true,
     "shuffle": true,
-    "init_cls": 20,
-    "increment": 20,
+    "init_cls": 40,
+    "increment": 40,
     "model_name": "foster",
     "backbone_type": "vit_base_patch16_224",
-    "device": ["0"],
+    "device": ["4"],
     "seed": [1993],
     
     "beta1":0.96,
@@ -25,7 +25,7 @@
     "boosting_epochs" : 20,
     "compression_epochs" : 20,
     "lr" : 1e-3,
-    "batch_size" : 32,
+    "batch_size" : 48,
     "weight_decay" : 5e-4,
     "num_workers" : 8,
     "T" : 2
