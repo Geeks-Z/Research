@@ -1,4 +1,6 @@
 import logging
+import time
+
 import numpy as np
 import torch
 from torch import nn
@@ -123,6 +125,7 @@ class Learner(BaseLearner):
 
     def _init_train(self, train_loader, test_loader, optimizer, scheduler):
         prog_bar = tqdm(range(self.args['tuned_epoch']))
+        start_time = time.time()
         for _, epoch in enumerate(prog_bar):
             self._network.train()
             losses = 0.0
@@ -154,7 +157,8 @@ class Learner(BaseLearner):
                 test_acc,
             )
             prog_bar.set_description(info)
-
+        total_time = time.time() - start_time
+        self.train_time += round(total_time, 2)
         logging.info(info)
 
     

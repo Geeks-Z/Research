@@ -1,5 +1,7 @@
 # Please note that the current implementation of DER only contains the dynamic expansion process, since masking and pruning are not implemented by the source repo.
 import logging
+import time
+
 import numpy as np
 from tqdm import tqdm
 import torch
@@ -111,6 +113,7 @@ class Learner(BaseLearner):
 
     def _init_train(self, train_loader, test_loader, optimizer, scheduler):
         prog_bar = tqdm(range(self.args["init_epoch"]))
+        start_time = time.time()
         for _, epoch in enumerate(prog_bar):
             self.train()
             losses = 0.0
@@ -151,7 +154,8 @@ class Learner(BaseLearner):
                     train_acc,
                 )
             prog_bar.set_description(info)
-
+        total_time = time.time() - start_time
+        self.train_time += round(total_time, 2)
         logging.info(info)
 
     def _update_representation(self, train_loader, test_loader, optimizer, scheduler):

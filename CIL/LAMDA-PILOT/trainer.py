@@ -118,6 +118,8 @@ def _train(args):
 
             print('Average Accuracy (CNN):', sum(cnn_curve["top1"])/len(cnn_curve["top1"]))
             logging.info("Average Accuracy (CNN): {} \n".format(sum(cnn_curve["top1"])/len(cnn_curve["top1"])))
+            logging.info("Train Time: {} \n".format(model.train_time))
+            logging.info("Test Time: {} \n".format(model.test_time))
 
     if len(cnn_matrix) > 0:
         np_acctable = np.zeros([task + 1, task + 1])

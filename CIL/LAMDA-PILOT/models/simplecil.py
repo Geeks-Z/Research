@@ -1,4 +1,6 @@
 import logging
+import time
+
 import numpy as np
 import torch
 from torch import nn
@@ -74,8 +76,10 @@ class Learner(BaseLearner):
             self._network = self._network.module
 
     def _train(self, train_loader, test_loader, train_loader_for_protonet):
-        
+        start_time =time.time()
         self._network.to(self._device)
+        total_time = time.time() - start_time
+        self.train_time += round(total_time, 2)
         self.replace_fc(train_loader_for_protonet, self._network, None)
 
         

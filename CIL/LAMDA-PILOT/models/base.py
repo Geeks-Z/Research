@@ -1,5 +1,7 @@
 import copy
 import logging
+import time
+
 import numpy as np
 import torch
 from torch import nn
@@ -26,6 +28,8 @@ class BaseLearner(object):
         self._device = args["device"][0]
         self._multiple_gpus = args["device"]
         self.args = args
+        self.train_time = 0
+        self.test_time = 0
 
     @property
     def exemplar_size(self):
@@ -113,6 +117,7 @@ class BaseLearner(object):
         return ret
 
     def eval_task(self):
+        start_time = time.time()
         y_pred, y_true = self._eval_cnn(self.test_loader)
         cnn_accy = self._evaluate(y_pred, y_true)
 
@@ -121,7 +126,8 @@ class BaseLearner(object):
             nme_accy = self._evaluate(y_pred, y_true)
         else:
             nme_accy = None
-
+        total_time = time.time() - start_time
+        self.test_time += round(total_time, 2)
         return cnn_accy, nme_accy
 
     def incremental_train(self):
