@@ -22,6 +22,8 @@ class Learner(BaseLearner):
         super().__init__(args)
         self._network = SimpleVitNet(args, True)
         self.args = args
+        self.train_time = 0
+        self.test_time = 0
 
     def after_task(self):
         self._known_classes = self._total_classes

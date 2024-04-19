@@ -97,11 +97,11 @@ def _train(args):
             logging.info("NME top1 curve: {}".format(nme_curve["top1"]))
             logging.info("NME top5 curve: {}\n".format(nme_curve["top5"]))
 
-            print('Average Accuracy (CNN):', sum(cnn_curve["top1"])/len(cnn_curve["top1"]))
-            print('Average Accuracy (NME):', sum(nme_curve["top1"])/len(nme_curve["top1"]))
+            print('Average Accuracy (CNN):', round(sum(cnn_curve["top1"])/len(cnn_curve["top1"]),2))
+            print('Average Accuracy (NME):', round(sum(nme_curve["top1"])/len(nme_curve["top1"]),2))
 
-            logging.info("Average Accuracy (CNN): {}".format(sum(cnn_curve["top1"])/len(cnn_curve["top1"])))
-            logging.info("Average Accuracy (NME): {}".format(sum(nme_curve["top1"])/len(nme_curve["top1"])))
+            logging.info("Average Accuracy (CNN): {}".format(round(sum(cnn_curve["top1"])/len(cnn_curve["top1"]),2)))
+            logging.info("Average Accuracy (NME): {}".format(round(sum(nme_curve["top1"])/len(nme_curve["top1"]),2)))
             logging.info("Train Time: {}".format(model.train_time))
             logging.info("Test Time: {} \n".format(model.test_time))
         else:
@@ -118,8 +118,8 @@ def _train(args):
             logging.info("CNN top1 curve: {}".format(cnn_curve["top1"]))
             logging.info("CNN top5 curve: {}\n".format(cnn_curve["top5"]))
 
-            print('Average Accuracy (CNN):', sum(cnn_curve["top1"])/len(cnn_curve["top1"]))
-            logging.info("Average Accuracy (CNN): {} \n".format(sum(cnn_curve["top1"])/len(cnn_curve["top1"])))
+            print('Average Accuracy (CNN):', round(sum(cnn_curve["top1"])/len(cnn_curve["top1"]),2))
+            logging.info("Average Accuracy (CNN): {} \n".format(round(sum(cnn_curve["top1"])/len(cnn_curve["top1"]),2)))
             logging.info("Train Time: {}".format(model.train_time))
             logging.info("Test Time: {} \n".format(model.test_time))
 
