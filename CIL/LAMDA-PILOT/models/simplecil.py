@@ -73,15 +73,15 @@ class Learner(BaseLearner):
         if len(self._multiple_gpus) > 1:
             print('Multiple GPUs')
             self._network = nn.DataParallel(self._network, self._multiple_gpus)
+        start_time = time.time()
         self._train(self.train_loader, self.test_loader, self.train_loader_for_protonet)
+        total_time = time.time() - start_time
+        self.train_time += round(total_time, 2)
         if len(self._multiple_gpus) > 1:
             self._network = self._network.module
 
     def _train(self, train_loader, test_loader, train_loader_for_protonet):
-        start_time =time.time()
         self._network.to(self._device)
-        total_time = time.time() - start_time
-        self.train_time += round(total_time, 2)
         self.replace_fc(train_loader_for_protonet, self._network, None)
 
         
