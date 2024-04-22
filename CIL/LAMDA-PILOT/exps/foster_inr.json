@@ -9,14 +9,14 @@
     "increment": 40,
     "model_name": "foster",
     "backbone_type": "vit_base_patch16_224",
-    "device": ["0"],
+    "device": ["5"],
     "seed": [1993],
     
     "beta1":0.96,
     "beta2":0.97,
     "oofc":"ft",
     "is_teacher_wa":false,
-    "is_student_wa":false,s
+    "is_student_wa":false,
     "lambda_okd":1,
     "wa_value":1,
     "init_epochs": 20,

@@ -12,10 +12,6 @@ python main.py --config=./exps/der_inr.json
 python main.py --config=./exps/der_ina_B0.json
 python main.py --config=./exps/der_omn_B0.json
 python main.py --config=./exps/der_vtab_B0.json
-python main.py --config=./exps/foster_cub_B0.json
-python main.py --config=./exps/foster_inr.json
-python main.py --config=./exps/foster_ina_B0.json
-python main.py --config=./exps/foster_omn_B0.json
-python main.py --config=./exps/foster_vtab_B0.json
+python main.py --config=./exps/der_cub_B0.json
 
 
