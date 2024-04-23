@@ -18,6 +18,8 @@ class Learner(BaseLearner):
     def __init__(self, args):
         super().__init__(args)
         self._network = IncrementalNet(args, True)
+        self.train_time = 0
+        self.test_time = 0
 
     def after_task(self):
         self._old_network = self._network.copy().freeze()
