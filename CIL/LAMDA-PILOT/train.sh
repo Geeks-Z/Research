@@ -1,5 +1,7 @@
 #!/bin/bash
 #python main.py --config=./exps/finetune.json
+python main.py --config=./exps/finetune_cub_B0.json
+#python main.py --config=./exps/finetune_omn_B0.json
 #python main.py --config=./exps/simplecil.json
 #python main.py --config=./exps/l2p.json
 #python main.py --config=./exps/dualprompt.json
@@ -11,5 +13,6 @@
 #python main.py --config=./exps/der_omn_B0.json
 #python main.py --config=./exps/der_vtab_B0.json
 #python main.py --config=./exps/der_cub_B0.json
+
 
 
