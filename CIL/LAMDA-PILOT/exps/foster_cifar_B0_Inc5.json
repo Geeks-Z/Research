@@ -8,8 +8,8 @@
     "init_cls": 20,
     "increment": 20,
     "model_name": "foster",
-    "backbone_type": "vit_base_patch16_224",
-    "device": ["4"],
+    "backbone_type": "vit_base_patch16_224_in21k",
+    "device": ["5"],
     "seed": [1993],
     
     "beta1": 0.96,

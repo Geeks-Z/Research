@@ -8,7 +8,7 @@
     "init_cls": 100,
     "increment": 20,
     "model_name": "der",
-    "backbone_type": "vit_base_patch16_224",
+    "backbone_type": "vit_base_patch16_224_in21k",
     "device": ["0"],
     "seed": [1993],
     

@@ -8,8 +8,8 @@
     "init_cls": 40,
     "increment": 40,
     "model_name": "finetune",
-    "backbone_type": "vit_base_patch16_224",
-    "device": ["5"],
+    "backbone_type": "vit_base_patch16_224_in21k",
+    "device": ["0"],
     
     "seed": [1993],
     "init_epoch": 20,
