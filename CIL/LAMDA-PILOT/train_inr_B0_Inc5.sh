@@ -1,5 +1,5 @@
 #!/bin/bash
-python main.py --config=./exps/finetune_inr_B0.json
+python main.py --config=./exps/finetune_inr_B0_Inc5.json
 python main.py --config=./exps/icarl_inr_B0_Inc5.json
 python main.py --config=./exps/der_inr_B0_Inc5.json
 python main.py --config=./exps/foster_inr_B0_Inc5.json
