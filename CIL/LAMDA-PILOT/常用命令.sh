@@ -13,3 +13,7 @@ nohup ./train_cifar_B0_Inc5.sh > ./res/3nd-baseline-cifar-B0-Inc5.out 2>&1 &
 nohup ./train_cub_B0_Inc10.sh > ./res/3nd-baseline-cub-B0-Inc10.out 2>&1 &
 
 nohup ./train_inr_B0_Inc5.sh > ./res/3nd-baseline-inr-B0-Inc5.out 2>&1 &
+
+nohup ./train_ina_B0_Inc20.sh > ./res/3nd-baseline-ina-B0-Inc20.out 2>&1 &
+
+nohup ./train_vtab_B0_Inc10.sh > ./res/3nd-baseline-vtab-B0-Inc10.out 2>&1 &
