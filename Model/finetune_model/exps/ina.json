@@ -3,8 +3,8 @@
     "dataset": "imageneta",
     "shuffle": true,
     "model_name": "vit",
-    "backbone_type": "pretrained_vit_b16_224",
-    "device": ["3"],
+    "backbone_type": "pretrained_vit_b16_224_in21k",
+    "device": ["7"],
     "seed": [1993],
 
     "tuned_epoch": 20,

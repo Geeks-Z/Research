@@ -87,7 +87,7 @@ class Learner(BaseLearner):
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.args['tuned_epoch'],
                                                          eta_min=self.min_lr)
         self._init_train(train_loader, optimizer, scheduler)
-        self.replace_fc(train_loader_for_protonet, self._network, None)
+        # self.replace_fc(train_loader_for_protonet, self._network, None)
 
     def _init_train(self, train_loader, optimizer, scheduler):
         prog_bar = tqdm(range(self.args['tuned_epoch']))
