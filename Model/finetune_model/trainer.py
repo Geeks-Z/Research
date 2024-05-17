@@ -56,7 +56,7 @@ def _train(args):
         "Trainable params: {}".format(count_parameters(model._network, True))
     )
     model.train(data_manager)
-    torch.save(model, '/home/team/zhaohongwei/checkpoint/' + str(args["dataset"]) +'-CosineLinear'+ '.pth')
+    torch.save(model, '/home/team/zhaohongwei/checkpoint/' + str(args["dataset"]) +'.pth')
     cnn_accy, nme_accy = model.eval_accuracy()
     print('Top1 Average Accuracy :', cnn_accy["top1"])
     print('Top5 Average Accuracy :', cnn_accy["top5"])

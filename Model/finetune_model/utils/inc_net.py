@@ -3,7 +3,6 @@ import torch
 from torch import nn
 from backbone.linears import CosineLinear
 import timm
-from peft import LoraConfig, get_peft_model
 def get_backbone(args, pretrained=False):
     name = args["backbone_type"].lower()
     # SimpleCIL or SimpleCIL w/ Finetune
@@ -134,7 +133,7 @@ class VITNet(BaseNet):
 
     def frozen_params(self, model):
         for name, p in model.named_parameters():
-            if 'mlp' in name:
+            if '11.mlp' in name:
                 p.requires_grad = True
             else:
                 p.requires_grad = False
