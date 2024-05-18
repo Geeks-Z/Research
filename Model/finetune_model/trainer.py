@@ -49,14 +49,16 @@ def _train(args):
         args["seed"],
         args,
     )
-
+    # 保存训练集和测试集的数量
+    torch.save(data_manager.train_dataset_num, './res/' + str(args["dataset"]) +'_train_num.pth')
+    torch.save(data_manager.test_dataset_num, './res/' + str(args["dataset"]) + '_test_num.pth')
     model = factory.get_model(args["model_name"], args)
     logging.info("All params: {}".format(count_parameters(model._network)))
     logging.info(
         "Trainable params: {}".format(count_parameters(model._network, True))
     )
     model.train(data_manager)
-    torch.save(model, '/home/team/zhaohongwei/checkpoint/' + str(args["dataset"]) +'.pth')
+    torch.save(model._network.backbone.state_dict(), '/home/team/zhaohongwei/checkpoint/' + str(args["dataset"]) +'s.pth')
     cnn_accy, nme_accy = model.eval_accuracy()
     print('Top1 Average Accuracy :', cnn_accy["top1"])
     print('Top5 Average Accuracy :', cnn_accy["top5"])

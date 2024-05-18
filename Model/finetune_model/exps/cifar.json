@@ -4,7 +4,7 @@
     "shuffle": true,
     "model_name": "vit",
     "backbone_type": "pretrained_vit_b16_224",
-    "device": ["3"],
+    "device": ["4"],
     "seed": [1993],
 
     "tuned_epoch": 1,

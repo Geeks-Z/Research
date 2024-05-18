@@ -18,6 +18,22 @@ class DataManager(object):
     def nb_classes(self):
         return len(self._class_order)
 
+    @property
+    def train_dataset_num(self):
+        train_dataset_num = []
+        class_list = np.unique(self._train_targets)
+        for class_index in class_list:
+            train_dataset_num.append(np.sum(self._train_targets == class_index))
+        return train_dataset_num
+
+    @property
+    def test_dataset_num(self):
+        test_dataset_num = []
+        class_list = np.unique(self._test_targets)
+        for class_index in class_list:
+            test_dataset_num.append(np.sum(self._test_targets == class_index))
+        return test_dataset_num
+
     def get_dataset(
             self, indices, source, mode, appendent=None, ret_data=False, m_rate=None
     ):
