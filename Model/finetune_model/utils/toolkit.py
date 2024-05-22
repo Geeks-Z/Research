@@ -1,3 +1,4 @@
+import importlib
 import os
 import numpy as np
 import torch
@@ -43,3 +44,10 @@ def split_images_labels(imgs):
         labels.append(item[1])
 
     return np.array(images), np.array(labels)
+
+def source_import(file_path):
+    """This function imports python module directly from source code using importlib"""
+    spec = importlib.util.spec_from_file_location('', file_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module

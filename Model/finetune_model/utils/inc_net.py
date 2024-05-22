@@ -133,7 +133,7 @@ class VITNet(BaseNet):
 
     def frozen_params(self, model):
         for name, p in model.named_parameters():
-            if '11.mlp' in name:
+            if 'mlp' in name:
                 p.requires_grad = True
             else:
                 p.requires_grad = False

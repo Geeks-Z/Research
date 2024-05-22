@@ -4,10 +4,10 @@
     "shuffle": true,
     "model_name": "vit",
     "backbone_type": "pretrained_vit_b16_224",
-    "device": ["4"],
+    "device": ["7"],
     "seed": [1993],
 
-    "tuned_epoch": 1,
+    "tuned_epoch": 20,
     "init_lr": 0.01,
     "batch_size": 128,
     "weight_decay": 0.05,

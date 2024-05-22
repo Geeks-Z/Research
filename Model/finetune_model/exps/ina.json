@@ -12,7 +12,8 @@
     "batch_size":48,
     "weight_decay":0.0005,
     "min_lr":0,
-    "optimizer": "sgd"
+    "optimizer": "sgd",
+    "loss_type": "./loss/CBLoss.py"
 
 }
 

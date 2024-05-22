@@ -7,7 +7,7 @@ from torch import optim
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from models.base import BaseLearner
-from utils.toolkit import tensor2numpy
+from utils.toolkit import tensor2numpy, source_import
 from utils.inc_net import VITNet
 import timm
 
@@ -99,7 +99,9 @@ class Learner(BaseLearner):
             for i, (_, inputs, targets) in enumerate(train_loader):
                 inputs, targets = inputs.to(self._device), targets.to(self._device)
                 logits = self._network(inputs)["logits"]
-                loss = F.cross_entropy(logits, targets)
+                # loss = F.cross_entropy(logits, targets)
+                criterion = source_import(self.args['loss_type']).create_loss()
+                loss = criterion(logits, targets, self.data_manager.train_dataset_num)
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
