@@ -8,24 +8,32 @@
 
 基于研究方向整理的代码仓库，包括但不限于：CIL（Class-Incremental Learning）类增量学习、PEFT（参数高效微调）等。
 
-## 文件目录
+## Class-Incremental Learning
 
-- `📁 CIL`：CIL（Class-Incremental Learning）类增量学习【Life-Long Machine Learning/Continual Learning】
-  - `📁 dualprompt-pytorch-master`：[DualPrompt: Complementary Prompting for Rehearsal-free Continual Learning](https://arxiv.org/abs/2204.04799) | [论文源码](https://github.com/google-research/l2p) | ECCV 2022 
-  - `📁 ECCV22-FOSTER-master`：[FOSTER: Feature Boosting and Compression for Class-Incremental Learning](https://arxiv.org/abs/2204.04662) | [论文源码](https://github.com/G-U-N/ECCV22-FOSTER) | ECCV 2022
-  - `📁 LAMDA-PILOT-main`：[PILOT: A Pre-Trained Model-Based Continual Learning Toolbox](https://arxiv.org/abs/2309.07117) | [论文源码](https://github.com/sun-hailong/LAMDA-PILOT) | 
-  - `📁 Learn-to-prompt-for-Continual-Learning-main`：[Learning to Prompt for Continual Learning](https://arxiv.org/abs/2112.08654) | [论文源码](https://github.com/google-research/l2p) | CVPR 2022
-  - `📁 PyCIL-master`：[PyCIL: A Python Toolbox for Class-Incremental Learning](https://arxiv.org/abs/2112.12533) | [论文源码](https://github.com/G-U-N/PyCIL) | 
-  - `📁 RevisitingCIL-main`：[Revisiting Class-Incremental Learning with Pre-Trained Models: Generalizability and Adaptivity are All You Need]() |  [论文源码](https://github.com/zhoudw-zdw/RevisitingCIL)
-- `📁 Model`：经典模型代码
-- `📁 PEFT`：参数高效微调代码
-- `📁 Z-Libraries`：修改后的第三方库
+> `📁 CIL`：CIL（Class-Incremental Learning）类增量学习【Life-Long Machine Learning/Continual Learning】
 
-## 实验脚本
+| Title                                                        | Venue | Year | Type    | Code                                                    | Code_Position                                   |
+| ------------------------------------------------------------ | ----- | ---- | ------- | ------------------------------------------------------- | ----------------------------------------------- |
+| [DualPrompt: Complementary Prompting for Rehearsal-free Continual Learning](https://arxiv.org/abs/2204.04799) | ECCV  | 2022 | Prompt  | [Official](https://github.com/google-research/l2p)      | `📁 dualprompt-pytorch-master`                   |
+| [FOSTER: Feature Boosting and Compression for Class-Incremental Learning](https://arxiv.org/abs/2204.04662) | ECCV  | 2022 | Prompt  | [Official](https://github.com/G-U-N/ECCV22-FOSTER)      | `📁 ECCV22-FOSTER-master`                        |
+| [PILOT: A Pre-Trained Model-Based Continual Learning Toolbox](https://arxiv.org/abs/2309.07117) |       |      | Toolbox | [Official](https://github.com/sun-hailong/LAMDA-PILOT)  | `📁 LAMDA-PILOT-main`                            |
+| [Learning to Prompt for Continual Learning](https://arxiv.org/abs/2112.08654) | CVPR  | 2022 |         | [Official](https://github.com/google-research/l2p)      | `📁 Learn-to-prompt-for-Continual-Learning-main` |
+| [PyCIL: A Python Toolbox for Class-Incremental Learning](https://arxiv.org/abs/2112.12533) |       |      | Toolbox | [Official](https://github.com/G-U-N/PyCIL)              | `📁 PyCIL-master`                                |
+| [Revisiting Class-Incremental Learning with Pre-Trained Models: Generalizability and Adaptivity are All You Need](https://arxiv.org/pdf/2303.07338) |       |      |         | [Official](https://github.com/zhoudw-zdw/RevisitingCIL) | `📁 RevisitingCIL-main`                          |
 
-- 执行脚本：`nohup ./train.sh > ./res/.out 2>&1 &`
-- 脚本配置：编辑`train.sh`
-  ```bash
-  #!/bin/bash
-  python main.py --config ./exps/simplecil.json
-  ```
+## Model
+
+> `📁 Model`：经典模型
+
+
+
+## PEFT
+
+> `📁 PEFT`：参数高效微调
+
+
+
+## Z-Libraries
+
+>  `📁 Z-Libraries`：修改后的第三方库
+
