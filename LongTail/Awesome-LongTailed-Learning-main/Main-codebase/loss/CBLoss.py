@@ -9,7 +9,7 @@ class CBLoss(nn.Module):
     def __init__(self, prior_txt, loss_type="softmax", beta=0.9999, gamma=1):
         super(CBLoss, self).__init__()  
         self.no_of_classes = 1000
-        self.samples_per_cls = calculate_prior(num_classes=1000, img_max=None, prior=None, prior_txt = prior_txt, return_num=True) 
+
         
         self.loss_type = loss_type
         self.beta = beta
